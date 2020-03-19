@@ -1,0 +1,78 @@
+# Metadata for List of Supermarket Licences
+---
+Identifier: '71cb3344-fcf7-4c93-9af8-dc08769e533c'
+Name: 'list-of-supermarket-licences'
+Title: 'List of Supermarket Licences'
+Description: 'List of supermarket licences with license details and locations'
+Topics:
+  - 'Environment'
+Keywords:
+  - 'Licensing'
+  - 'NEA'
+  - 'Retail'
+Publisher:
+  Name: 'National Environment Agency'
+  Admin 1:
+    Name: 'Goh Jie Wei'
+    Department: 'Environmental Public Health Ops'
+    Email: 'goh_jie_wei@nea.gov.sg'
+Sources:
+  - 'National Environment Agency'
+License: 'https://data.gov.sg/open-data-licence'
+Frequency: 'Quarterly'
+Coverage: '2016-06-26 to 2016-06-26'
+Last Updated: '2017-04-17T11:40:08.053574'
+Resources:
+  -
+    Identifier: '3561a136-4ee4-4029-a5cd-ddf591cce643'
+    Title: 'List of Supermarket Licences'
+    Url: 'https://storage.data.gov.sg/list-of-supermarket-licences/resources/list-of-supermarket-licences-2017-03-07T03-09-49Z.csv'
+    Format: 'CSV'
+    Coverage: '2016-06-26 to 2016-06-26'
+    Description: 'List of supermarket licences with license details and locations'
+    Last Updated: '2017-03-07T03:09:49.603668'
+    Schema:
+      -
+        Name: 'licence_num'
+        Title: 'Licence Number'
+        Type: 'text'
+        Sub Type: 'general'
+      -
+        Name: 'licensee_name'
+        Title: 'Licensee Name'
+        Type: 'text'
+        Sub Type: 'general'
+      -
+        Name: 'building_name'
+        Title: 'Building Name'
+        Type: 'text'
+        Sub Type: 'address'
+        Description: '"na" : Data not available or not applicable'
+      -
+        Name: 'block_house_num'
+        Title: 'Block House Number'
+        Type: 'text'
+        Sub Type: 'address'
+        Description: '"na" : Data not available or not applicable'
+      -
+        Name: 'level_num'
+        Title: 'Level Number'
+        Type: 'text'
+        Sub Type: 'address'
+        Description: '"na" : Data not available or not applicable'
+      -
+        Name: 'unit_num'
+        Title: 'Unit Number'
+        Type: 'text'
+        Sub Type: 'address'
+      -
+        Name: 'street_name'
+        Title: 'Street Name'
+        Type: 'text'
+        Sub Type: 'address'
+        Description: '"na" : Data not available or not applicable'
+      -
+        Name: 'postal_code'
+        Title: 'Postal Code'
+        Type: 'text'
+        Sub Type: 'postal_code'
