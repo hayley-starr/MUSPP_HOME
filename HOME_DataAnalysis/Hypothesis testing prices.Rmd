@@ -1,0 +1,102 @@
+---
+title: "Hypothesis testing prices"
+author: "Jia Xin"
+date: "3/18/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+# Hypothesis testing of prices 
+
+## Grocery shop prices
+```{r}
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
+```
+
+## Testing for eggs 
+
+### Between supermarkets and shops near dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+```{r}
+grocery_shops_prices %>%
+  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_SM_outside <- grocery_shops_prices %>%
+  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>% 
+  specify(formula = Price.of.1.egg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("outside dorm", "major supermarket"))
+
+mean_diff_egg_SM_outside
+```
+
+```{r}
+null_distribution_egg_SM_outside <- grocery_shops_prices %>%
+  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>%  
+  specify(formula = Price.of.1.egg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("outside dorm", "major supermarket"))
+```
+
+```{r}
+null_distribution_egg_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_egg_SM_outside, direction = "greater")
+```
+
+### Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices %>%
+  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_SM_inside <- grocery_shops_prices %>%
+  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>% 
+  specify(formula = Price.of.1.egg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("within dorm", "major supermarket"))
+
+mean_diff_egg_SM_inside
+```
+
+```{r}
+null_distribution_egg_SM_inside <- grocery_shops_prices %>%
+  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>%  
+  specify(formula = Price.of.1.egg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("within dorm", "major supermarket"))
+```
+
+```{r}
+null_distribution_egg_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_egg_SM_inside, direction = "greater")
+```
