@@ -28,40 +28,83 @@ library(forcats)
 library(infer)
 ```
 
-# Hypothesis testing of prices 
+# Hypothesis testing of grocery shop prices 
+*Check mean prices and change order if needed
 
-## Grocery shop prices
 ```{r}
 grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
 ```
 
-## Testing for eggs 
+## (1) Testing for basket of goods 
+1 basket = 10 eggs, 5kg rice, 3kg potatoes, 3kg onions, 1kg dhal, 1kg curry powder 
 
-### Between supermarkets and shops near dorms 
-Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+## (2) Testing for eggs 
+
 ```{r}
-grocery_shops_prices %>%
-  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>%
+grocery_shops_prices_egg_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.1.egg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_egg_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_near_far <- grocery_shops_prices_egg_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.1.egg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+
+mean_diff_egg_near_far
+```
+
+```{r}
+null_distribution_egg_near_far <- grocery_shops_prices_egg_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.1.egg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_egg_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_egg_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
   group_by (Remarks) %>%
   summarise (mean_egg = mean(Price.of.1.egg))
 ```
 
 ```{r}
-mean_diff_egg_SM_outside <- grocery_shops_prices %>%
-  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>% 
+mean_diff_egg_SM_outside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
   specify(formula = Price.of.1.egg ~ Remarks) %>% 
-  calculate(stat = "diff in means", order = c("outside dorm", "major supermarket"))
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
 
 mean_diff_egg_SM_outside
 ```
 
 ```{r}
-null_distribution_egg_SM_outside <- grocery_shops_prices %>%
-  filter (Remarks == "outside dorm" | Remarks == "major supermarket") %>%  
+null_distribution_egg_SM_outside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
   specify(formula = Price.of.1.egg ~ Remarks) %>%  
   hypothesize(null = "independence") %>% 
   generate(reps = 500, type = "permute") %>% 
-  calculate(stat = "diff in means", order = c("outside dorm", "major supermarket"))
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
 ```
 
 ```{r}
@@ -69,34 +112,1705 @@ null_distribution_egg_SM_outside %>%
   get_pvalue(obs_stat = mean_diff_egg_SM_outside, direction = "greater")
 ```
 
-### Between supermarkets and shops in dorms 
+### (c) Between supermarkets and shops in dorms 
 Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
 ```{r}
-grocery_shops_prices %>%
-  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>%
+grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
   group_by (Remarks) %>%
   summarise (mean_egg = mean(Price.of.1.egg))
 ```
 
 ```{r}
-mean_diff_egg_SM_inside <- grocery_shops_prices %>%
-  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>% 
+mean_diff_egg_SM_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
   specify(formula = Price.of.1.egg ~ Remarks) %>% 
-  calculate(stat = "diff in means", order = c("within dorm", "major supermarket"))
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
 
 mean_diff_egg_SM_inside
 ```
 
 ```{r}
-null_distribution_egg_SM_inside <- grocery_shops_prices %>%
-  filter (Remarks == "within dorm" | Remarks == "major supermarket") %>%  
+null_distribution_egg_SM_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
   specify(formula = Price.of.1.egg ~ Remarks) %>%  
   hypothesize(null = "independence") %>% 
   generate(reps = 500, type = "permute") %>% 
-  calculate(stat = "diff in means", order = c("within dorm", "major supermarket"))
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
 ```
 
 ```{r}
 null_distribution_egg_SM_inside %>% 
   get_pvalue(obs_stat = mean_diff_egg_SM_inside, direction = "greater")
+```
+
+```{r}
+null_distribution_egg_SM_inside %>% 
+  visualise(bins = 100) +
+  shade_p_value(obs_stat = mean_diff_egg_SM_inside, direction = "greater")
+```
+
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_LI_outside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.1.egg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+
+mean_diff_egg_LI_outside
+```
+
+```{r}
+null_distribution_egg_LI_outside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.1.egg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_egg_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_egg_LI_outside, direction = "greater")
+```
+
+```{r}
+null_distribution_egg_LI_outside %>% 
+  visualise(bins = 100) +
+  shade_p_value(obs_stat = mean_diff_egg_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_LI_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.1.egg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+
+mean_diff_egg_LI_inside
+```
+
+```{r}
+null_distribution_egg_LI_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.1.egg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+```
+
+```{r}
+null_distribution_egg_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_egg_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_egg = mean(Price.of.1.egg))
+```
+
+```{r}
+mean_diff_egg_outside_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.1.egg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+
+mean_diff_egg_outside_inside
+```
+
+```{r}
+null_distribution_egg_outside_inside <- grocery_shops_prices_egg_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.1.egg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_egg_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_egg_outside_inside, direction = "greater")
+```
+
+## (3) Testing for rice 
+
+```{r}
+grocery_shops_prices_rice_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.rice.kg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_near_far <- grocery_shops_prices_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.rice.kg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+
+mean_diff_rice_near_far
+```
+
+```{r}
+null_distribution_rice_near_far <- grocery_shops_prices_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.rice.kg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_rice_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_rice_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_SM_outside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.rice.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+
+mean_diff_rice_SM_outside
+```
+
+```{r}
+null_distribution_rice_SM_outside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.rice.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_rice_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_rice_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_SM_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.rice.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+
+mean_diff_rice_SM_inside
+```
+
+```{r}
+null_distribution_rice_SM_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.rice.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_rice_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_rice_SM_inside, direction = "greater")
+```
+
+```{r}
+null_distribution_rice_SM_inside %>% 
+  visualise(bins = 100) +
+  shade_p_value(obs_stat = mean_diff_rice_SM_inside, direction = "greater")
+```
+
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_LI_outside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.rice.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+
+mean_diff_rice_LI_outside
+```
+
+```{r}
+null_distribution_rice_LI_outside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.rice.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_rice_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_rice_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_LI_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.rice.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+
+mean_diff_rice_LI_inside
+```
+
+```{r}
+null_distribution_rice_LI_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.rice.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+```
+
+```{r}
+null_distribution_rice_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_rice_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_rice = mean(Price.of.rice.kg))
+```
+
+```{r}
+mean_diff_rice_outside_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.rice.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+
+mean_diff_rice_outside_inside
+```
+
+```{r}
+null_distribution_rice_outside_inside <- grocery_shops_prices_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.rice.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_rice_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_rice_outside_inside, direction = "greater")
+```
+
+## (4) Testing for curry powder
+
+```{r}
+grocery_shops_prices_curry_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.curry.powder.kg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_rice = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_near_far <- grocery_shops_prices_curry_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_curry_near_far <- grocery_shops_prices_curry_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_curry_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_curry_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_curry = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_SM_outside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_curry_SM_outside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_curry_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_curry_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_curry = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_SM_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_curry_SM_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_curry_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_curry_SM_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_curry = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_LI_outside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_curry_LI_outside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_curry_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_curry_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_curry = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_LI_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+
+```
+
+```{r}
+null_distribution_curry_LI_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+```
+
+```{r}
+null_distribution_curry_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_curry_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_curry = mean(Price.of.curry.powder.kg))
+```
+
+```{r}
+mean_diff_curry_outside_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_curry_outside_inside <- grocery_shops_prices_curry_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.curry.powder.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_curry_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_curry_outside_inside, direction = "greater")
+```
+
+## (5) Testing for dhal
+
+```{r}
+grocery_shops_prices_dhal_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.dhal.kg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_near_far <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.dhal.kg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_dhal_near_far <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.dhal.kg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_dhal_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_SM_outside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_dhal_SM_outside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_dhal_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_SM_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_dhal_SM_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_dhal_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_SM_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_LI_outside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_dhal_LI_outside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_dhal_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_LI_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+
+```
+
+```{r}
+null_distribution_dhal_LI_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+```
+
+```{r}
+null_distribution_dhal_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.dhal.kg))
+```
+
+```{r}
+mean_diff_dhal_outside_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_dhal_outside_inside <- grocery_shops_prices_dhal_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.dhal.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_dhal_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_dhal_outside_inside, direction = "greater")
+```
+
+## (6) Testing for onions 
+
+```{r}
+grocery_shops_prices_onions_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.onions.kg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_onions = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_near_far <- grocery_shops_prices_onions_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.onions.kg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_onions_near_far <- grocery_shops_prices_onions_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.onions.kg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_onions_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_onions_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_onions = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_SM_outside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.onions.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_onions_SM_outside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.onions.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_onions_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_onions_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_onions = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_SM_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.onions.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_onions_SM_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.onions.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_onions_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_onions_SM_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_onions = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_LI_outside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.onions.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_onions_LI_outside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.onions.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Little India"))
+```
+
+```{r}
+null_distribution_onions_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_onions_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_onions = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_LI_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.onions.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+
+```
+
+```{r}
+null_distribution_onions_LI_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.onions.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Little India"))
+```
+
+```{r}
+null_distribution_onions_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_onions_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_dhal = mean(Price.of.onions.kg))
+```
+
+```{r}
+mean_diff_onions_outside_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.onions.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_onions_outside_inside <- grocery_shops_prices_onions_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.onions.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_onions_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_onions_outside_inside, direction = "greater")
+```
+
+## (7) Testing for potatoes
+
+```{r}
+grocery_shops_prices_potatoes_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.potatoes.kg != "NA")
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_near_far <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Position) %>% 
+  calculate(stat = "diff in means", order = c ("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_potatoes_near_far <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_potatoes_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_SM_outside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_potatoes_SM_outside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_potatoes_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_SM_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_potatoes_SM_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_potatoes_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_SM_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_LI_outside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_potatoes_LI_outside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_potatoes_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_LI_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+
+```
+
+```{r}
+null_distribution_potatoes_LI_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_potatoes_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_potatoes = mean(Price.of.potatoes.kg))
+```
+
+```{r}
+mean_diff_potatoes_outside_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_potatoes_outside_inside <- grocery_shops_prices_potatoes_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.potatoes.kg ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_potatoes_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_potatoes_outside_inside, direction = "greater")
+```
+
+# Hypothesis testing for food outlets prices
+
+```{r}
+food_prices <- read.csv("data/food_outlets_prices_test.csv")
+```
+
+## (1) Testing for Briyani
+
+```{r}
+food_prices_briyani_cleaned <- food_prices %>%
+  filter(Price.of.briyani != "NA")
+```
+
+### (a) Between hawker centre/Little India and shops near dorms
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_near_far <- food_prices_briyani_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  specify(formula = Price.of.briyani ~ Position) %>% 
+  calculate(stat = "diff in means", order = c ("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_briyani_near_far <- food_prices_briyani_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.briyani ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_briyani_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_near_far, direction = "greater")
+```
+
+### (b) Between hawker centres and shops outside dorms 
+Hypothesis: The prices in hawker centres are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_HC_outside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.briyani ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Hawker Centre"))
+```
+
+```{r}
+null_distribution_briyani_HC_outside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.briyani ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Hawker Centre"))
+```
+
+```{r}
+null_distribution_briyani_HC_outside %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_HC_outside, direction = "greater")
+```
+
+### (c) Between hawker centres and shops in dorms 
+Hypothesis: The prices in hakwer centres are significantly lower than those of shops in dorms 
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_HC_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.briyani ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_briyani_HC_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.briyani ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_briyani_HC_inside %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_HC_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_LI_outside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.briyani ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_briyani_LI_outside <- food_prices_briyani_cleaned%>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.briyani ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_briyani_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_LI_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.briyani ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+
+```
+
+```{r}
+null_distribution_briyani_LI_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.briyani ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_briyani_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_briyani = mean(Price.of.briyani))
+```
+
+```{r}
+mean_diff_briyani_outside_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.briyani ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_briyani_outside_inside <- food_prices_briyani_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.briyani ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_briyani_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_briyani_outside_inside, direction = "greater")
+```
+
+## (2) Testing for Chicken with rice
+
+```{r}
+food_prices_chicken_rice_cleaned <- food_prices %>%
+  filter(Price.of.rice.with.chicken != "NA")
+```
+
+### (a) Between hawker centres/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_chicken_rice = mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_near_far <- food_prices_chicken_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  specify(formula = Price.of.rice.with.chicken ~ Position) %>% 
+  calculate(stat = "diff in means", order = c ("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_near_far <- food_prices_chicken_rice_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Position) %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_near_far, direction = "greater")
+```
+
+### (b) Between hawker centres and shops outside dorms 
+Hypothesis: The prices in hawker centres are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_chicken_rice = mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_HC_outside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Outside dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_HC_outside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Outside dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_HC_outside %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_HC_outside, direction = "greater")
+```
+
+### (c) Between hawker centres and shops in dorms 
+Hypothesis: The prices in hakwer centres are significantly lower than those of shops in dorms 
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_chicken_rice= mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_HC_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_HC_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_HC_inside %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_HC_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_chicken_rice = mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_LI_outside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_LI_outside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_chicken_rice = mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_LI_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+
+```
+
+```{r}
+null_distribution_chicken_rice_LI_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_chicken_rice = mean(Price.of.rice.with.chicken))
+```
+
+```{r}
+mean_diff_chicken_rice_outside_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_outside_inside <- food_prices_chicken_rice_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.rice.with.chicken ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_chicken_rice_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_chicken_rice_outside_inside, direction = "greater")
+```
+
+## (3) Testing for Plain prata
+
+```{r}
+food_prices_prata_cleaned <- food_prices %>%
+  filter(Price.of.plain.prata != "NA")
+```
+
+### (a) Between hawker centres/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_near_far <- food_prices_prata_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  specify(formula = Price.of.plain.prata ~ Position) %>% 
+  calculate(stat = "diff in means", order = c ("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_prata_near_far <- food_prices_prata_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Price.of.plain.prata ~ Position) %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Far dorm", "Near dorm"))
+```
+
+```{r}
+null_distribution_prata_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_prata_near_far, direction = "greater")
+```
+
+### (b) Between hawker centres and shops outside dorms 
+Hypothesis: The prices in hawker centres are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_HC_outside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.plain.prata ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Outside dorm"))
+```
+
+```{r}
+null_distribution_prata_HC_outside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.plain.prata ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Outside dorm"))
+```
+
+```{r}
+null_distribution_prata_HC_outside %>% 
+  get_pvalue(obs_stat = mean_diff_prata_HC_outside, direction = "greater")
+```
+
+### (c) Between hawker centres and shops in dorms 
+Hypothesis: The prices in hakwer centres are significantly lower than those of shops in dorms 
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%
+  group_by (Remarks) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_HC_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>% 
+  specify(formula = Price.of.plain.prata ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_prata_HC_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Hawker Centre") %>%  
+  specify(formula = Price.of.plain.prata ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Hawker Centre", "Within dorm"))
+```
+
+```{r}
+null_distribution_prata_HC_inside %>% 
+  get_pvalue(obs_stat = mean_diff_prata_HC_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_LI_outside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.plain.prata ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_prata_LI_outside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.plain.prata ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_prata_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_prata_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_LI_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Price.of.plain.prata ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+
+```
+
+```{r}
+null_distribution_prata_LI_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Price.of.plain.prata ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_prata_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_prata_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_prata = mean(Price.of.plain.prata))
+```
+
+```{r}
+mean_diff_prata_outside_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Price.of.plain.prata ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_prata_outside_inside <- food_prices_prata_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Price.of.plain.prata ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Within dorm"))
+```
+
+```{r}
+null_distribution_prata_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_prata_outside_inside, direction = "greater")
 ```
