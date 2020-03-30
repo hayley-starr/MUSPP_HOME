@@ -36,14 +36,233 @@ grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
 ```
 
 ## (1) Testing for basket of goods 
+
 1 basket = 10 eggs, 5kg rice, 3kg potatoes, 3kg onions, 1kg dhal, 1kg curry powder 
 
+```{r}
+grocery_shops_prices_basket_cleaned <- grocery_shops_prices %>%
+  filter(Basket.price != "NA")
+```
+
+```{r}
+#Mean price of basket
+mean_basket_price_region <- grocery_shops_prices_basket_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_basket_price = mean (Basket.price)) %>%
+  arrange(mean_basket_price)
+```
+
+```{r}
+#Mean price of basket visually
+mean_basket_price_region %>%
+  ggplot(aes(x = Region, y = mean_basket_price)) + geom_col()
+```
+
+### (a) Between supermarkets/Little India and shops near dorms 
+Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>%
+  group_by (Position) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_near_far <- grocery_shops_prices_basket_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Basket.price ~ Position) %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_basket_near_far <- grocery_shops_prices_basket_cleaned %>%
+  filter (Position == "Near dorm" | Position == "Far dorm") %>% 
+  specify(formula = Basket.price ~ Position) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Near dorm", "Far dorm"))
+```
+
+```{r}
+null_distribution_basket_near_far %>% 
+  get_pvalue(obs_stat = mean_diff_basket_near_far, direction = "greater")
+```
+
+### (b) Between supermarkets and shops outside dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_SM_outside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Basket.price ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_basket_SM_outside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Basket.price ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Outside dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_basket_SM_outside %>% 
+  get_pvalue(obs_stat = mean_diff_basket_SM_outside, direction = "greater")
+```
+
+### (c) Between supermarkets and shops in dorms 
+Hypothesis: The prices in supermarkets are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%
+  group_by (Remarks) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_SM_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>% 
+  specify(formula = Basket.price~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_basket_SM_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Supermarket") %>%  
+  specify(formula = Basket.price ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Supermarket"))
+```
+
+```{r}
+null_distribution_basket_SM_inside %>% 
+  get_pvalue(obs_stat = mean_diff_basket_SM_inside, direction = "greater")
+```
+
+### (d) Between Little India and shops outside dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops near dorms 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_LI_outside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>% 
+  specify(formula = Basket.price ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_basket_LI_outside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Outside dorm" | Remarks == "Little India") %>%  
+  specify(formula = Basket.price ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Outside dorm"))
+```
+
+```{r}
+null_distribution_basket_LI_outside %>% 
+  get_pvalue(obs_stat = mean_diff_basket_LI_outside, direction = "greater")
+```
+
+### (e) Between Little India and shops in dorms 
+Hypothesis: The prices in Little India are significantly lower than those of shops in dorms 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%
+  group_by (Remarks) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_LI_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>% 
+  specify(formula = Basket.price ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_basket_LI_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Little India") %>%  
+  specify(formula = Basket.price ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Little India", "Within dorm"))
+```
+
+```{r}
+null_distribution_basket_LI_inside %>% 
+  get_pvalue(obs_stat = mean_diff_basket_LI_inside, direction = "greater")
+```
+
+### (f) Between shops in dorms and shops outside dorm 
+
+```{r}
+grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%
+  group_by (Remarks) %>%
+  summarise (mean_basket = mean(Basket.price))
+```
+
+```{r}
+mean_diff_basket_outside_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>% 
+  specify(formula = Basket.price ~ Remarks) %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_basket_outside_inside <- grocery_shops_prices_basket_cleaned %>%
+  filter (Remarks == "Within dorm" | Remarks == "Outside dorm") %>%  
+  specify(formula = Basket.price ~ Remarks) %>%  
+  hypothesize(null = "independence") %>% 
+  generate(reps = 500, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Within dorm", "Outside dorm"))
+```
+
+```{r}
+null_distribution_basket_outside_inside %>% 
+  get_pvalue(obs_stat = mean_diff_basket_outside_inside, direction = "greater")
+```
 
 ## (2) Testing for eggs 
 
 ```{r}
 grocery_shops_prices_egg_cleaned <- grocery_shops_prices %>%
   filter(Price.of.1.egg != "NA")
+```
+
+```{r}
+#Mean price of egg
+mean_egg_price_region <- grocery_shops_prices_egg_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_egg_price = mean (Price.of.1.egg)) %>%
+  arrange(mean_egg_price)
+```
+
+```{r}
+#Mean price of egg visually
+mean_egg_price_region %>%
+  arrange(mean_egg_price) %>%
+  ggplot(aes(x = Region, y = mean_egg_price)) + geom_col()
 ```
 
 ### (a) Between supermarkets/Little India and shops near dorms 
@@ -262,6 +481,22 @@ grocery_shops_prices_rice_cleaned <- grocery_shops_prices %>%
   filter(Price.of.rice.kg != "NA")
 ```
 
+```{r}
+#Mean price of rice
+mean_rice_price_region <- grocery_shops_prices_rice_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_rice_price = mean (Price.of.rice.kg)) %>%
+  arrange(mean_rice_price)
+```
+
+```{r}
+#Mean price of egg visually
+mean_rice_price_region %>%
+  arrange(mean_rice_price) %>%
+  ggplot(aes(x = Region, y = mean_rice_price)) + geom_col()
+```
+
+
 ### (a) Between supermarkets/Little India and shops near dorms 
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
 
@@ -472,6 +707,22 @@ grocery_shops_prices_curry_cleaned <- grocery_shops_prices %>%
   filter(Price.of.curry.powder.kg != "NA")
 ```
 
+```{r}
+#Mean price of curry
+mean_curry_price_region <- grocery_shops_prices_curry_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_curry_price = mean (Price.of.curry.powder.kg)) %>%
+  arrange(mean_curry_price)
+```
+
+```{r}
+#Mean price of curry visually
+mean_curry_price_region %>%
+  arrange(mean_curry_price) %>%
+  ggplot(aes(x = Region, y = mean_curry_price)) + geom_col()
+```
+
+
 ### (a) Between supermarkets/Little India and shops near dorms 
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
 
@@ -663,6 +914,22 @@ null_distribution_curry_outside_inside %>%
 grocery_shops_prices_dhal_cleaned <- grocery_shops_prices %>%
   filter(Price.of.dhal.kg != "NA")
 ```
+
+```{r}
+#Mean price of dhal
+mean_dhal_price_region <- grocery_shops_prices_dhal_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_dhal_price = mean (Price.of.dhal.kg)) %>%
+  arrange(mean_dhal_price)
+```
+
+```{r}
+#Mean price of egg visually
+mean_dhal_price_region %>%
+  arrange(mean_dhal_price) %>%
+  ggplot(aes(x = Region, y = mean_dhal_price)) + geom_col()
+```
+
 
 ### (a) Between supermarkets/Little India and shops near dorms 
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
@@ -856,6 +1123,21 @@ grocery_shops_prices_onions_cleaned <- grocery_shops_prices %>%
   filter(Price.of.onions.kg != "NA")
 ```
 
+```{r}
+#Mean price of onion
+mean_onion_price_region <- grocery_shops_prices_onions_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_onion_price = mean (Price.of.onions.kg)) %>%
+  arrange(mean_onion_price)
+```
+
+```{r}
+#Mean price of onion visually
+mean_onion_price_region %>%
+  arrange(mean_onion_price) %>%
+  ggplot(aes(x = Region, y = mean_onion_price)) + geom_col()
+```
+
 ### (a) Between supermarkets/Little India and shops near dorms 
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
 
@@ -1046,6 +1328,21 @@ null_distribution_onions_outside_inside %>%
 ```{r}
 grocery_shops_prices_potatoes_cleaned <- grocery_shops_prices %>%
   filter(Price.of.potatoes.kg != "NA")
+```
+
+```{r}
+#Mean price of potato
+mean_potato_price_region <- grocery_shops_prices_potatoes_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_potato_price = mean (Price.of.potatoes.kg)) %>%
+  arrange(mean_potato_price)
+```
+
+```{r}
+#Mean price of onion visually
+mean_potato_price_region %>%
+  arrange(mean_potato_price) %>%
+  ggplot(aes(x = Region, y = mean_potato_price)) + geom_col()
 ```
 
 ### (a) Between supermarkets/Little India and shops near dorms 
@@ -1246,6 +1543,21 @@ food_prices_briyani_cleaned <- food_prices %>%
   filter(Price.of.briyani != "NA")
 ```
 
+```{r}
+#Mean price of briyani
+mean_briyani_price_region <- food_prices_briyani_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_briyani_price = mean (Price.of.briyani)) %>%
+  arrange(mean_briyani_price)
+```
+
+```{r}
+#Mean price of onion visually
+mean_briyani_price_region %>%
+  arrange(mean_briyani_price) %>%
+  ggplot(aes(x = Region, y = mean_briyani_price)) + geom_col()
+```
+
 ### (a) Between hawker centre/Little India and shops near dorms
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
 
@@ -1438,6 +1750,21 @@ food_prices_chicken_rice_cleaned <- food_prices %>%
   filter(Price.of.rice.with.chicken != "NA")
 ```
 
+```{r}
+#Mean price of chicken rice
+mean_chicken_rice_price_region <- food_prices_chicken_rice_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_chicken_rice_price = mean (Price.of.rice.with.chicken)) %>%
+  arrange(mean_chicken_rice_price)
+```
+
+```{r}
+#Mean price of onion visually
+mean_chicken_rice_price_region %>%
+  arrange(mean_chicken_rice_price) %>%
+  ggplot(aes(x = Region, y = mean_chicken_rice_price)) + geom_col()
+```
+
 ### (a) Between hawker centres/Little India and shops near dorms 
 Hypothesis: The prices in shops far from the dorms are significantly lower than those of shops near dorms 
 
@@ -1628,6 +1955,21 @@ null_distribution_chicken_rice_outside_inside %>%
 ```{r}
 food_prices_prata_cleaned <- food_prices %>%
   filter(Price.of.plain.prata != "NA")
+```
+
+```{r}
+#Mean price of chicken rice
+mean_prata_price_region <- food_prices_prata_cleaned %>%
+  group_by(Region) %>% 
+  summarise (mean_prata_price = mean (Price.of.plain.prata)) %>%
+  arrange(mean_prata_price)
+```
+
+```{r}
+#Mean price of onion visually
+mean_prata_price_region %>%
+  arrange(mean_prata_price) %>%
+  ggplot(aes(x = Region, y = mean_prata_price)) + geom_col()
 ```
 
 ### (a) Between hawker centres/Little India and shops near dorms 
