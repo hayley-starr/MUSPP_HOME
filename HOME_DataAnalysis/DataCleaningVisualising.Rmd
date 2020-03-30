@@ -118,11 +118,6 @@ grocery_shops_600m_points_dorms <- grocery_shops_600m_points %>%
   filter (Remarks != "Little India")
 ```
 
-```{r}
-### Plot on map
-tm_shape(dorms_fix_encoding) + tm_bubbles() + tm_shape(grocery_shops_600m_points_dorms) + tm_dots(col = "blue") + tm_shape(grocery_shops_600m_points_little_india) + tm_dots(col = "purple")
-```
-
 ## Supermarkets location (NTUC, ShengSiong, Giant)
 
 ```{r}
@@ -226,11 +221,6 @@ food_outlets_points_little_india <- food_outlets_600m_points %>%
 food_outlets_600m_points_dorms <- food_outlets_600m_points %>%
   filter (Remarks != "Little India") %>%
   filter (Remarks != "Hawker Centre")
-```
-
-```{r}
-### Plot on map
-tm_shape(dorms_fix_encoding) + tm_bubbles() + tm_shape(food_outlets_600m_points_dorms) + tm_dots(col = "blue") + tm_shape(food_outlets_600m_points_little_india) + tm_dots(col = "purple")
 ```
 
 ## Hawker Centres 
