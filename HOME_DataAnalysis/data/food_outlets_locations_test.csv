@@ -1,92 +1,92 @@
-Shop,Lat,Lon
-Fujiang food court,1.344266,103.753306
-KJM Indian Food,1.342554,103.754238
-Best Crispy Prata Indian Food,1.3387,103.7586
-Canteen in Acacia Lodge,1.339651,103.75562
-Foodhub,1.336735,103.755449
-Toh Guan Cafe,1.3382,103.753483
-Poosakaarmess,1.33733,103.752718
-Lamiah Briyani,1.337453,103.752737
-New Chettinad Curry,1.337267,103.752631
-Bangladeshi Restura,1.337205,105.752746
-Tasty Food Paradise,1.336688,103.751346
-Safa Indian Muslim Food,1.3367,103.7512
-Kian Teck Eating House,1.328949,103.693873
-Makkal Villas,1.329582,103.693905
-Canteen in Blue Stars Dormitory,1.333096,103.695361
-511 Indian Store,1.329771,103.680914
-Bites and Carry,1.329099,103.677151
-Canteen in Avery Lodge,1.320697,103.730145
-Canteen in Cassia@Penjuru,1.317959,103.732006
-BFN Foods Canteen,1.322643,103.728428
-Food court close to Baazar,1.32207,103.728061
-Canteen in Jurong Penjuru Dormitory 1,1.316449,103.731149
-Canteen in Jurong Penjuru Dormitory 2,1.316605,103.732577
-Qi Kopi Pte Ltd,1.272035,103.633467
-Food court in dorm,1.313991,103.625694
-Rashida Indian Food,1.313,103.6217
-Ieat canteen,1.318944,103.628882
-Tuas South Recreation Centre,1.269861,103.634161
-Tuas Village,1.321818,103.656711
-AA restaurant,1.32182,103.661305
-Indian Food Bangladesh,1.45961,103.82015
-Indian Food Ltd,1.459603,103.820186
-Zam Zam Special Indian Food,1.458051,103.799167
-Afrah Food Corner,1.456277,103.787193
-Nivi's restaurant,1.4616,103.8101
-Aysha's Indian Muslim Food,1.4626,103.811
-Phan Nee Food Centre,1.455017,103.805099
-Bangladesh Muslim Food,1.450433,103.796878
-Shekh Indian and Pakistan Food,1.450706,103.796771
-Al Habib Indian Food,1.450375,103.796662
-Tangajl Porabarj Indian Food,1.450459,103.796951
-Banana Leaf Platter,1.451072,103.793727
-Suria Food,1.452407,103.792946
-New Palani Vilas Indian Food,1.452251,103.792414
-SDDC Canteen,1.452384,103.793951
-Arasu restaurant,1.4533,103.7951
-Lodge 1 dorm canteen,1.450238,103.794858
-Al Khadijah,1.448184,103.797609
-Thashan's curry,1.451504,103.797058
-Park E1 Eating House,1.455277,103.797728
-EML Eating House,1.455035,103.798008
-46 Kopitiam,1.456332,103.797587
-Fu Man Lou Kopitiam,1.448557,103.80085
-Al Hazima Restaurant,1.406375,103.759728
-Lion City Food Court Pte Ltd,1.40598,103.759439
-Canteen in Westlite Mandai,1.407169,103.758038
-ST Food Court,1.377526,103.718199
-Asam Treet FN,1.376114,103.718304
-Ashiwanga Restaurant,1.4176,103.8961
-Canteen in Changi Lodge 2,1.3132,103.9963
-King's Indian Muslim Food,1.366767,103.929241
-T&N Restaurant,1.337372,103.906649
-AK Indian Food,1.337404,103.90655
-New Chetty Villas,1.337423,103.906491
-Al Afaria Foods,1.338135,103.909715
-Shun Li Industrial Park Indian Muslim Food,1.336231,103.910579
-Aaka Indian Muslim Food,1.338,103.8869
-New King Cafe Indian Muslim Food,1.3388,103.8865
-Al Rahmal Banana Leaf Indian Muslim Food,1.3386,103.8864
-Singai Chettinadu Restaurant,1.33881,103.886229
-Valli Villas Indian Muslim Food,1.3375,103.8852
-Small shop near The Shaw Lodge,1.3372,103.885
-Tasmia Minimart,1.3369,103.8847
-18 Abi Place,1.337107,103.902608
-Alamin Makan House,1.332451,103.906912
-WE Canteen,1.334614,103.904878
-Raj and Raj North Indian Food,1.335663,103.905339
-Six Stars Restaurant and Catering,1.3364,103.903606
-Sheh Restaurant,1.3372427,103.905647
-Sri Murugan Villas,1.3374,103.9033
-Raja Rajan,1.3376,103.9072
-Masala Cafe,1.337504,103.902685
-Marsiling Market,1.443963,103.777
-Yuhua Market and Food Centre,1.345461,103.7316
-Bedok Resevoir Hawker Centre,1.332478,103.9126
-Pasir Panjang Food Centre,1.275968,103.7913
-Tekka Market,1.306384,103.8507
-CMK 2001,1.309513,103.855544
-Mohammed Waseef,1.3099,103.856
-Nawab's Briyani,1.308836,103.855504
-Master Kurry,1.308928,103.855251
+Shop,Lat,Lon,Remarks
+Fujiang food court,1.344266,103.753306,Outside dorm
+KJM Indian Food,1.342554,103.754238,Outside dorm
+Best Crispy Prata Indian Food,1.3387,103.7586,Outside dorm
+Canteen in Acacia Lodge,1.339651,103.75562,Within dorm
+Foodhub,1.336735,103.755449,Outside dorm
+Toh Guan Cafe,1.3382,103.753483,Within dorm
+Poosakaarmess,1.33733,103.752718,Outside dorm
+Lamiah Briyani,1.337453,103.752737,Outside dorm
+New Chettinad Curry,1.337267,103.752631,Outside dorm
+Bangladeshi Restura,1.337205,105.752746,Outside dorm
+Tasty Food Paradise,1.336688,103.751346,Within dorm
+Safa Indian Muslim Food,1.3367,103.7512,Outside dorm
+Kian Teck Eating House,1.328949,103.693873,Outside dorm
+Makkal Villas,1.329582,103.693905,Outside dorm
+Canteen in Blue Stars Dormitory,1.333096,103.695361,Within dorm
+511 Indian Store,1.329771,103.680914,Outside dorm
+Bites and Carry,1.329099,103.677151,Within dorm
+Canteen in Avery Lodge,1.320697,103.730145,Outside dorm
+Canteen in Cassia@Penjuru,1.317959,103.732006,Within dorm
+BFN Foods Canteen,1.322643,103.728428,Outside dorm
+Food court close to Baazar,1.32207,103.728061,Outside dorm
+Canteen in Jurong Penjuru Dormitory 1,1.316449,103.731149,Within dorm
+Canteen in Jurong Penjuru Dormitory 2,1.316605,103.732577,Within dorm
+Qi Kopi Pte Ltd,1.272035,103.633467,Outside dorm
+Food court in dorm,1.313991,103.625694,Outside dorm
+Rashida Indian Food,1.313,103.6217,Outside dorm
+Ieat canteen,1.318944,103.628882,Outside dorm
+Tuas South Recreation Centre,1.269861,103.634161,Outside dorm
+Tuas Village,1.321818,103.656711,Outside dorm
+AA restaurant,1.32182,103.661305,Outside dorm
+Indian Food Bangladesh,1.45961,103.82015,Within dorm
+Indian Food Ltd,1.459603,103.820186,Within dorm
+Zam Zam Special Indian Food,1.458051,103.799167,Outside dorm
+Afrah Food Corner,1.456277,103.787193,Within dorm
+Nivi's restaurant,1.4616,103.8101,Within dorm
+Aysha's Indian Muslim Food,1.4626,103.811,Outside dorm
+Phan Nee Food Centre,1.455017,103.805099,Within dorm
+Bangladesh Muslim Food,1.450433,103.796878,Outside dorm
+Shekh Indian and Pakistan Food,1.450706,103.796771,Outside dorm
+Al Habib Indian Food,1.450375,103.796662,Outside dorm
+Tangajl Porabarj Indian Food,1.450459,103.796951,Outside dorm
+Banana Leaf Platter,1.451072,103.793727,Outside dorm
+Suria Food,1.452407,103.792946,Outside dorm
+New Palani Vilas Indian Food,1.452251,103.792414,Outside dorm
+SDDC Canteen,1.452384,103.793951,Outside dorm
+Arasu restaurant,1.4533,103.7951,Outside dorm
+Lodge 1 dorm canteen,1.450238,103.794858,Within dorm
+Al Khadijah,1.448184,103.797609,Outside dorm
+Thashan's curry,1.451504,103.797058,Within dorm
+Park E1 Eating House,1.455277,103.797728,Outside dorm
+EML Eating House,1.455035,103.798008,Outside dorm
+46 Kopitiam,1.456332,103.797587,Outside dorm
+Fu Man Lou Kopitiam,1.448557,103.80085,Outside dorm
+Al Hazima Restaurant,1.406375,103.759728,Within dorm
+Lion City Food Court Pte Ltd,1.40598,103.759439,Outside dorm
+Canteen in Westlite Mandai,1.407169,103.758038,Within dorm
+ST Food Court,1.377526,103.718199,Within dorm
+Asam Treet FN,1.376114,103.718304,Within dorm
+Ashiwanga Restaurant,1.4176,103.8961,Within dorm
+Canteen in Changi Lodge 2,1.3132,103.9963,Within dorm
+King's Indian Muslim Food,1.366767,103.929241,Within dorm
+T&N Restaurant,1.337372,103.906649,Outside dorm
+AK Indian Food,1.337404,103.90655,Outside dorm
+New Chetty Villas,1.337423,103.906491,Outside dorm
+Al Afaria Foods,1.338135,103.909715,Within dorm
+Shun Li Industrial Park Indian Muslim Food,1.336231,103.910579,Outside dorm
+Aaka Indian Muslim Food,1.338,103.8869,Outside dorm
+New King Cafe Indian Muslim Food,1.3388,103.8865,Outside dorm
+Al Rahmal Banana Leaf Indian Muslim Food,1.3386,103.8864,Outside dorm
+Singai Chettinadu Restaurant,1.33881,103.886229,Outside dorm
+Valli Villas Indian Muslim Food,1.3375,103.8852,Outside dorm
+Small shop near The Shaw Lodge,1.3372,103.885,Within dorm
+Tasmia Minimart,1.3369,103.8847,Within dorm
+18 Abi Place,1.337107,103.902608,Outside dorm
+Alamin Makan House,1.332451,103.906912,Outside dorm
+WE Canteen,1.334614,103.904878,Outside dorm
+Raj and Raj North Indian Food,1.335663,103.905339,Outside dorm
+Six Stars Restaurant and Catering,1.3364,103.903606,Within dorm
+Sheh Restaurant,1.3372427,103.905647,Outside dorm
+Sri Murugan Villas,1.3374,103.9033,Outside dorm
+Raja Rajan,1.3376,103.9072,Outside dorm
+Masala Cafe,1.337504,103.902685,Outside dorm
+Marsiling Market,1.443963,103.777,Hawker Centre
+Yuhua Market and Food Centre,1.345461,103.7316,Hawker Centre
+Bedok Resevoir Hawker Centre,1.332478,103.9126,Hawker Centre
+Pasir Panjang Food Centre,1.275968,103.7913,Hawker Centre
+Tekka Market,1.306384,103.8507,Little India
+CMK 2001,1.309513,103.855544,Little India
+Mohammed Waseef,1.3099,103.856,Little India
+Nawab's Briyani,1.308836,103.855504,Little India
+Master Kurry,1.308928,103.855251,Little India
