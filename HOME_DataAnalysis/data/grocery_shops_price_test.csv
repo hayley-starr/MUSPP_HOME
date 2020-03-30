@@ -1,21 +1,53 @@
-Shop,Price of 1 egg,Price of rice/kg,Price of curry powder/kg,Price of dhal/kg,Price of onions/kg,Price of potatoes/kg,Remarks
-Sri Murugan Trading Pte Ltd,0.16,1.36,6.8,3.6,2.8,2.5,outside dorm
-Toh Guan Minimart,0.2,1.5,8,4.4,,2.8,outside dorm
-Shafen Supermarket,0.15,1.5,14,5,2.83,1.6,outside dorm
-M&M Sundry,0.2,1.28,8.4,4.4,3,2.7,outside dorm
-GGM Minimart,0.23,1.5,8,4,,2.5,outside dorm
-Ajmal Supermarket,0.19,1.36,7.6,3.5,2.97,1.97,within dorm
-Star Supermarket,0.18,1.36,7.6,2.5,3,1.9,outside dorm
-Malar Marketing,0.17,1.4,7.2,3.2,2.83,1.7,outside dorm
-Sadia Supermarket,0.14,1.36,6.4,2.5,3.5,1.5,outside dorm
-Popular Supermarket,0.13,1.36,2,2.6,1.88,0.86,outside dorm
-Balu Minmart,0.15,1.38,7.2,3.3,2.83,0.91,outside dorm
-Waangoo Mart,0.16,1.4,8.4,2,2.8,1.5,outside dorm
-Prime Supermarket Woodlands Mart,0.125,1.5,11.5,,,,outside dorm
-Giant Hypermarket Woodlands Mart,0.138,1.46,12.75,5.8,2.5,1.35,outside dorm
-Sheng Siong Woodlands Industrial Park,0.14,1.19,6.4,3.9,3.65,1.3,outside dorm
-Phan Nee SM CCK 1,0.22,1.35,7.6,4,3.3,2.4,within dorm
-Phan Nee SM CCK 2,0.16,1.3,7.6,4.2,2.83,1.45,within dorm
-Fairprice,0.137,1.16,7,6.4,2.3,1.7,major supermarket
-Sheng Siong,0.14,1.19,6.4,3.9,3.65,1.3,major supermarket
-Giant,0.138,1.46,6.4,3.2,2.5,1.35,major supermarket
+Shop,Price of 1 egg,Price of rice/kg,Price of curry powder/kg,Price of dhal/kg,Price of onions/kg,Price of potatoes/kg,Remarks,Position
+Sri Murugan Trading Pte Ltd,0.16,1.36,6.8,3.6,2.8,2.5,Outside dorm,Near dorm
+Toh Guan Minimart,0.2,1.5,8,4.4,,2.8,Within dorm,Near dorm
+Shafen Supermarket,0.15,1.5,14,5,2.83,1.6,Within dorm,Near dorm
+M&M Sundry,0.2,1.28,8.4,4.4,3,2.7,Outside dorm,Near dorm
+Jurong Island Mini-mart,0.15,1.5,7.2,3.2,0.85,0.75,Outside dorm,Near dorm
+GGM Minimart,0.23,1.5,8,4,,2.5,Outside dorm,Near dorm
+Minimart inside dorm,0.17,1.3,7.6,3.5,3.5,2.5,Outside dorm,Near dorm
+Kolee Supermarket,0.19,1.3,6.8,3.6,3.33,1.2,Within dorm,Near dorm
+Baazar near Lian Beng (Papan),0.13,1.5,7.2,2.9,3.5,2,Outside dorm,Near dorm
+Ajmal Supermarket Centrurion (Papan),0.15,1.36,6.8,3.2,3.5,2.4,Outside dorm,Near dorm
+Minimart inside dorm,0.14,1.38,7.6,2.8,3,2.2,Within dorm,Near dorm
+Kingsmart,0.15,1.38,7.6,3.2,1.2,1.2,Within dorm,Near dorm
+Bazaar in Penjuru Recreation Centre,0.13,1.5,7.2,3,2.6,1.1,Outside dorm,Near dorm
+Sheng Shiong Supermarket,0.14,1.19,7,3,4.5,1.6,Outside dorm,Near dorm
+Ajmal Supermarket Tuas View,0.19,1.36,7.6,3.5,2.97,1.97,Within dorm,Near dorm
+Star Supermarket,0.18,1.36,7.6,2.5,3,1.9,Outside dorm,Near dorm
+Malar Marketing,0.17,1.4,7.2,3.2,2.83,1.7,Outside dorm,Near dorm
+Sadia Supermarket,0.14,1.36,6.4,2.5,3.5,1.5,Outside dorm,Near dorm
+Popular Supermarket,0.13,1.36,2,2.6,1.88,0.86,Outside dorm,Near dorm
+Balu Minmart,0.15,1.38,7.2,3.3,2.83,0.91,Outside dorm,Near dorm
+Phan Nee Supermarket Cochrane Lodge 1,0.2,1.54,7.6,3.8,3.2,1.9,Within dorm,Near dorm
+3C Supermarket,0.2,1.3,7.6,3.5,2.83,1.97,Within dorm,Near dorm
+7SEVEN Shipping Festival Supermarket,0.2,1.76,8.4,3.8,3.6,3,Within dorm,Near dorm
+Ajmal Supermarket Westlite Woodlands,0.16,1.12,6.4,3.2,2.83,2,Within dorm,Near dorm
+Minimart in Woodlands Dormitory,0.2,1.4,8,4,2.93,2.5,Within dorm,Near dorm
+Waangoo Mart,0.16,1.4,8.4,2,2.8,1.5,Outside dorm,Near dorm
+Prime Supermarket Woodlands Mart,0.125,1.5,11.5,,,,Outside dorm,Near dorm
+Giant Hypermarket Woodlands Mart,0.138,1.46,12.75,5.8,2.5,1.35,Outside dorm,Near dorm
+Sheng Siong Woodlands Industrial Park,0.14,1.19,6.4,3.9,3.65,1.3,Outside dorm,Near dorm
+Minimart in Woodlands Lodge 2,0.23,1.5,11.2,3.4,2.83,2,Within dorm,Near dorm
+Minimart in Mandai Lodge 1,0.2,1.4,8,4,3,2,Within dorm,Near dorm
+Bismillan Minimart Pte Ltd,0.183,1.78,8,5,2,0.98,Within dorm,Near dorm
+Phan Nee SM CCK 1,0.22,1.35,7.6,4,3.3,2.4,Within dorm,Near dorm
+Phan Nee SM CCK 2,0.16,1.3,7.6,4.2,2.83,1.45,Within dorm,Near dorm
+Begonia Supermarket,0.18,1.5,7.6,4,,,Within dorm,Near dorm
+Triple N Supermarket,,1.2,7.6,3,,,Outside dorm,Near dorm
+AZ Supermarket,0.167,1.5,6.9,3.2,4,2,Within dorm,Near dorm
+RK Stores Trading,0.25,1.4,,3.8,4,2.5,Outside dorm,Near dorm
+Sivameni Minimart,0.22,1.5,9.2,4,,,Outside dorm,Near dorm
+Sarathi Stores,0.2,1.5,8,4.5,3,2.5,Outside dorm,Near dorm
+Rajan Minimart,0.183,1.4,7.2,3.5,2.33,0.9,Outside dorm,Near dorm
+Tasmia Minimart,0.22,1.429,,5,,,Within dorm,Near dorm
+Popular Fresh Marketplace,0.133,1.36,8.2,2.3,3.5,1.7,Outside dorm,Near dorm
+Tenaga Mini Mart,0.2,1.56,7.6,3.8,2.4,2.4,Outside dorm,Near dorm
+Golden Bamboo,0.22,2.15,14.58,6.67,2,2,Outside dorm,Near dorm
+Vivo Mart Enterprises,0.15,1.196,7.2,2.6,2.3,1.83,Within dorm,Near dorm
+NTUC,0.137,1.16,7,6.4,2.36,1.7,Supermarket,Far dorm
+Giant,0.138,1.46,6.4,3.2,3.65,1.35,Supermarket,Far dorm
+Sheng Siong,0.14,1.19,6.4,3.9,2.5,1.3,Supermarket,Far dorm
+Tekka Market,0.17,,8,4,8,4,Little India,Far dorm
+Chennai Trading & Supermart Pte Ltd,0.167,1.3,6.4,3.4,4,3,Little India,Far dorm
+Mustafa,0.185,1.975,7.6,2.8,1.9,1.3,Little India,Far dorm
