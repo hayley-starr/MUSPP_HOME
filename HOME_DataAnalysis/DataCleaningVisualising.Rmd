@@ -365,3 +365,5 @@ bus_stops_within_600m_of_dorms <- bus_stops %>%
 tm_shape(dorms_fix_encoding) + tm_bubbles () + tm_shape(bus_stops_within_600m_of_dorms) + tm_dots (col = "blue")
 ```
 
+
+
