@@ -1,29 +1,67 @@
-Shop,Lat,Lon,
-Minimart within Acacia Lodge,1.339286,103.755388,
-Sri Murugan Trading Pte Ltd,1.336468,103.75567,
-Toh Guan Minimart,1.338248,103.75357,
-Shafen Supermarket,1.335764,103.751458,
-M&M Sundry,1.328868,103.693867,
-AB Minimart,1.33308,103.693867,
-GGM Minimart,1.328938,103.677151,
-Nawas Global Pte Ltd,1.271618,103.633239,
-,,,
-Tuas South Supermarket,1.272723,103.637734,
-Ajmal Supermarket,1.314222,103.625733,
-Star Supermarket,1.318012,103.628954,
-Malar Marketing,1.313,103.6217,
-Sadia Supermarket,1.270094,103.634764,
-Popular Supermarket,1.27025,103.635046,
-Balu Minmart,1.3216,103.6615,
-Waangoo Mart,1.4536,103.7958,
-Minimart inside dorm,1.450238,103.794858,
-Prime Supermarket Woodlands Mart,1.445876,103.7981,
-Giant Hypermarket Woodlands Mart,1.445629,103.7979,
-Sheng Siong Woodlands Industrial Park,1.45086,103.796994,
-Minimart inside dorm,1.451504,103.797058,
-Fortune Supermarket Woodlands Crescent,1.448055,103.801033,
-Sri Krishna Mart,1.448096,103.801111,
-,,,
-Phan Nee SM CCK 1,1.376048,103.718074,
-Phan Nee SM CCK 2,1.377537,103.719166,
-,,,
+Shop,Lat,Lon,Remarks
+Minimart in Acacia Lodge,1.339286,103.755388,Within dorm
+Sri Murugan Trading Pte Ltd,1.336468,103.75567,Outside dorm
+Toh Guan Minimart,1.338248,103.75357,Within dorm
+Shafen Supermarket,1.335764,103.751458,Within dorm
+M&M Sundry,1.328868,103.693867,Outside dorm
+AB Minimart,1.33308,103.693867,Within dorm
+Jurong Island Mini-mart,1.333123,103.695416,Outside dorm
+GGM Minimart,1.328938,103.677151,Within dorm
+Minimart inside dorm,1.320697,103.730145,Within dorm
+Kolee Supermarket,1.3179606,103.731816,Within dorm
+Ajmal Supermarket Centurion (Papan),1.3218,103.728277,Outside dorm
+Minimart inJurong Penjuru Dormitory 1,1.316061,103.7315587,Within dorm
+Kingsmart,1.31634,103.73237,Within dorm
+Bazaar in Penjuru Recreation Centre,1.319243,103.732714,Outside dorm
+Sheng Shiong Supermarket,1.318834,103.732654,Outside dorm
+Mart in Terusan Recreation Centre ,1.321894,103.72713,Outside dorm
+Nawas Global Pte Ltd,1.271618,103.633239,Outside dorm
+Tuas South Supermarket,1.272723,103.637734,Outside dorm
+Ajmal Supermarket Tuas View,1.314222,103.625733,Within dorm
+Star Supermarket,1.318012,103.628954,Outside dorm
+Malar Marketing,1.313,103.6217,Outside dorm
+Sadia Supermarket,1.270094,103.634764,Outside dorm
+Popular Supermarket,1.27025,103.635046,Outside dorm
+Balu Minmart,1.3216,103.6615,Outside dorm
+Phan Nee Supermarket,1.459603,103.820186,Within dorm
+3C Supermarket,1.46121,103.818329,Within dorm
+7SEVEN Shipping Festival Supermarket,1.455835,103.787359,Within dorm
+Ajmal Supermarket Westlite Woodlands,1.461,103.81,Within dorm
+Miniart in Woodlands Dormitory,1.4546,103.8047,Within dorm
+Waangoo Mart,1.4536,103.7958,Outside dorm
+Minimart in Woodlands Lodge 1,1.450238,103.794858,Within dorm
+Prime Supermarket Woodlands Mart,1.445876,103.7981,Outside dorm
+Giant Hypermarket Woodlands Mart,1.445629,103.7979,Outside dorm
+Sheng Siong Woodlands Industrial Park,1.45086,103.796994,Outside dorm
+Minimart in Woodlands Lodge 2,1.451504,103.797058,Within dorm
+Fortune Supermarket Woodlands Crescent,1.448055,103.801033,Outside dorm
+Sri Krishna Mart,1.448096,103.801111,Outside dorm
+Murugan Traders Ptd Ltd,1.4508,103.7966,Outside dorm
+Mimimart in Mandai Lodge 1,1.410687,103.768867,Within dorm
+Ajmal Trade Mart Weslite Juniper,1.406389,103.759678,Within dorm
+Bismillan Minimart Pte Ltd,1.407734,103.758323,Outside dorm
+Phan Nee SM CCK 1,1.376048,103.718074,Within dorm
+Phan Nee SM CCK 2,1.377537,103.719166,Within dorm
+Minimart in PPT Lodge 1A,1.4189,103.8963,Within dorm
+Home Supermarket,1.4176,103.8961,Within dorm
+Minimart within Changi Lodge 2,1.3132,103.9963,Within dorm
+Begonia Supermarket,1.36686,103.92952,Within dorm
+Salaam Bangladesh,1.367,103.9265,Outside dorm
+Triple N Supermarket,1.337345,103.905945,Outside dorm
+AZ Supermarket,1.3373,103.9083,Within dorm
+RK Stores Trading,1.3377,103.8876,Outside dorm
+Sivameni Minimart,1.3388,103.8565,Outside dorm
+Sarathi Stores,1.33752,103.887141,Outside dorm
+Shiv Sagar,1.3394,103.8862,Outside dorm
+Rajan Minimart,1.3396,103.8859,Outside dorm
+Chup Hwa Tiong,1.34,103.8856,Outside dorm
+Tasmia Minimart,1.3369,103.8847,Within dorm
+Popular Fresh Marketplace,1.336959,103.902861,Outside dorm
+Tosn Minimart N Restaurant,1.338413,103.902112,Outside dorm
+Happy Minimart,1.337861,103.903944,Outside dorm
+Tenaga Mini Mart,1.332415,103.906,Outside dorm
+Golden Bamboo,1.333512,103.906808,Outside dorm
+Vivo Mart Enterprises,1.3371,103.9037,Within dorm
+Tekka Market,1.306384,103.8507,Little India
+Chennai Trading & Supermart Pte Ltd,1.307157,103.850276,Little India
+Mustafa Centre,1.309872,103.855596,Little India

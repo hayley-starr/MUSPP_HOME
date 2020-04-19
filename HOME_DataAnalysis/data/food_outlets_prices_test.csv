@@ -1,27 +1,67 @@
-Shop,Price of briyani,Price of rice with chicken,Price of plain prata,Remarks
-KJM Indian Food,,3.5,1,outside dorm
-Best Crispy Prata Indian Food,5.5,4.5,1,outside dorm
-Foodhub,5,3.5,1,outside dorm
-Toh Guan Cafe,5,3.5,1,wihtin dorm
-Poosakaarmess,5,3.5,1.5,outside dorm
-New Chettinad Curry,,3.5,,outside dorm
-Bangladeshi Restura,5,3,,outside dorm
-Tasty Food Paradise,,4,,outside dorm
-Safa Indian Muslim Food,4.5,3.5,0.75,outside dorm
-Kian Teck Eating House,5,3.5,0.67,outside dorm
-511 Indian Store,,,,outside dorm
-Bites and Carry,,,,wihtin dorm
-Food court in dorm,5,3.5,1,outside dorm
-Rashida Indian Food,5,3,1,outside dorm
-Ieat canteen,5,,1,outside dorm
-Tuas South Recreation Centre,3,2.5,1,outside dorm
-AA restaurant,5,4.5,1,outside dorm
-Tuas Village,5,3.5,1,outside dorm
-Bangladesh Muslim Food,5,4,1,outside dorm
-Shekh Indian and Pakistan Food,,4,1,outside dorm
-Banana Leaf Platter,5,3.5,1,outside dorm
-Lodge 1 dorm canteen,4,2.5,1,within dorm
-Al Khadijah,5.5,4.5,1,outside dorm
-Thashan's curry,5,3.5,0.9,within dorm
-ST Food Court,,,,within dorm
-Asam Treet FN,,,,within dorm
+Shop,Price of briyani,Price of rice with chicken,Price of plain prata,Remarks,Position,Region,Region_specific
+KJM Indian Food,,3.5,1,Outside dorm,Near dorm,West,West_1
+Best Crispy Prata Indian Food,5.5,4.5,1,Outside dorm,Near dorm,West,West_1
+Foodhub,5,3.5,1,Outside dorm,Near dorm,West,West_1
+Toh Guan Cafe,5,3.5,1,Within dorm,Near dorm,West,West_1
+Poosakaarmess,5,3.5,1.5,Outside dorm,Near dorm,West,West_1
+New Chettinad Curry,,3.5,,Outside dorm,Near dorm,West,West_1
+Bangladeshi Restura,5,3,,Outside dorm,Near dorm,West,West_1
+Tasty Food Paradise,,4,,Outside dorm,Near dorm,West,West_1
+Safa Indian Muslim Food,4.5,3.5,0.75,Outside dorm,Near dorm,West,West_1
+Kian Teck Eating House,5,3.5,0.67,Outside dorm,Near dorm,West,West_2
+511 Indian Store,5,4,0.8,Outside dorm,Near dorm,West,West_2
+Bites and Carry,,4.5,1,Within dorm,Near dorm,West,West_2
+Canteen in Avery Lodge,4,,1,Within dorm,Near dorm,West,West_3
+Canteen in Cassia@Penjuru,4,,0.5,Within dorm,Near dorm,West,West_3
+BFN Foods Canteen,4.5,,0.9,Outside dorm,Near dorm,West,West_3
+Canteen in Jurong Penjuru Dormitory 1,4.5,,0.8,Within dorm,Near dorm,West,West_3
+Canteen in Jurong Penjuru Dormitory 2,5,,0.8,Within dorm,Near dorm,West,West_3
+Food court in Tuas View Dorm,5,3.5,1,Within dorm,Near dorm,West,West_4
+Rashida Indian Food,5,3,1,Outside dorm,Near dorm,West,West_4
+Ieat canteen,5,,1,Outside dorm,Near dorm,West,West_4
+Tuas South Recreation Centre,3,2.5,1,Outside dorm,Near dorm,West,West_4
+Tuas Village,5,3.5,1,Outside dorm,Near dorm,West,West_4
+AA restaurant,5,4.5,1,Outside dorm,Near dorm,West,West_4
+Indian Food Ltd,,,0.933,Within dorm,Near dorm,North,North_1
+Indian Food Bangladesh,5,,0.7,Within dorm,Near dorm,North,North_1
+Zam Zam Special Indian Food,5,,1,Outside dorm,Near dorm,North,North_1
+Afrah Food Corner,5,4.8,,Within dorm,Near dorm,North,North_1
+Nivi's Restaurant,5,3.5,1,Within dorm,Near dorm,North,North_1
+Aysha's Indian Muslim Food,5,4,0.9,Outside dorm,Near dorm,North,North_1
+Phan Nee Food Centre,,4,1,Within dorm,Near dorm,North,North_1
+Bangladesh Muslim Food,5,4,1,Outside dorm,Near dorm,North,North_1
+Shekh Indian and Pakistan Food,,4,1,Outside dorm,Near dorm,North,North_1
+Banana Leaf Platter,5,3.5,1,Outside dorm,Near dorm,North,North_1
+Lodge 1 dorm canteen,4,2.5,1,Within dorm,Near dorm,North,North_1
+Al Khadijah,5.5,4.5,1,Outside dorm,Near dorm,North,North_1
+Thashan's curry,5,3.5,0.9,Within dorm,Near dorm,North,North_1
+Al Hazima Restaurant,5.5,,1,Within dorm,Near dorm,North,North_2
+Lion City Food Court Pte Ltd,5,,,Outside dorm,Near dorm,North,North_2
+Canteen in Westlite Mandai,5,3.5,1.5,Within dorm,Near dorm,North,North_2
+ST Food Court,4.5,,1,Within dorm,Near dorm,North,North_3
+Canteen in Changi Lodge 2,,4,1,Within dorm,Near dorm,East,East_1
+King's Indian Muslim Food,5,4,0.8,Within dorm,Near dorm,East,East_2
+AK Indian Food,5.5,4.5,1,Outside dorm,Near dorm,East,East_2
+New Chetty Villas,6,4,1,Outside dorm,Near dorm,East,East_2
+Al Afaria Foods,3,5,1,Within dorm,Near dorm,East,East_2
+Shun Li Industrial Park Indian Muslim Food,5,4,1,Outside dorm,Near dorm,East,East_2
+Aaka Indian Muslim Food,5,4.5,1,Outside dorm,Near dorm,East,East_2
+New King Cafe Indian Muslim Food,6,4,1,Outside dorm,Near dorm,East,East_2
+Al Rahmal Banana Leaf Indian Muslim Food,6,4,1,Outside dorm,Near dorm,East,East_2
+Singai Chettinadu Restaurant,6,5.5,1,Outside dorm,Near dorm,East,East_2
+Tasmia Restaurant,4,3,1,Within dorm,Near dorm,East,East_2
+Valli Villas Indian Muslim Food,1,3.5,,Outside dorm,Near dorm,East,East_2
+Alamin Makan House,5,4,1,Outside dorm,Near dorm,East,East_2
+Raj and Raj North Indian Food,5.5,5,1.1,Outside dorm,Near dorm,East,East_2
+Sheh Restaurant,4.5,3.5,1,Within dorm,Near dorm,East,East_2
+Sri Murugan Villas,4.5,3.8,1,Outside dorm,Near dorm,East,East_2
+Raja Rajan,5,3.5,1,Outside dorm,Near dorm,East,East_2
+Marsiling Market,4,,0.9,Hawker Centre,Far dorm,Hawker Centre,Hawker Centre
+Yuhua Market and Food Centre,4.5,,1,Hawker Centre,Far dorm,Hawker Centre,Hawker Centre
+Bedok Resevoir Hawker Centre ,6,,0.9,Hawker Centre,Far dorm,Hawker Centre,Hawker Centre
+Pasir Panjang Food Centre,5.5,4.5,1.2,Hawker Centre,Far dorm,Hawker Centre,Hawker Centre
+Tekka Market,5.5,5,1,Little India,Far dorm,Little India,Little India
+CMK 2001,7,4,1.2,Little India,Far dorm,Little India,Little India
+Mohammed Waseef,6,5,1,Little India,Far dorm,Little India,Little India
+Nawab's Briyani,3,4,,Little India,Far dorm,Little India,Little India
+Master Kurry,6,,1,Little India,Far dorm,Little India,Little India
