@@ -1,0 +1,136 @@
+---
+title: "Calculating Mean Basket Prices"
+author: "Hayley Garment"
+date: "4/25/2020"
+output: html_document
+---
+
+In this file:
+
+1. Calculate mean basket price for each dorm 
+2. Calculate mean basket price for each region
+3. Get the list of dorms for which there is price data
+4. Calculate mean basket price for clustered dorms
+5. Summing access in different regions
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+1. Calculate mean basket price for each dorm 
+```{r}
+# get grocery shops near each dorm
+groceries_dorm_id  <- readRDS('data/geo_groceries_with_ids.rds')
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
+
+sf_grocery_prices <- left_join(groceries_dorm_id, grocery_shops_prices) %>% 
+  select(Shop, dorm_id, Basket.price, geometry)
+
+sf_grocery_prices_no_na <- sf_grocery_prices %>% 
+  filter(!is.na(Basket.price))
+
+sf_avg_price_near_dorm <- sf_grocery_prices_no_na %>% group_by(dorm_id) %>% 
+  summarize(mean_price = mean(Basket.price)) %>% 
+  ungroup()
+
+saveRDS(sf_avg_price_near_dorm,'data/geo_avg_basket_per_dorm.rds')
+
+tm_shape(sf_avg_price_near_dorm) + tm_dots(col='mean_price')
+```
+
+2. Calculate mean basket price for each region
+```{r}
+sf_avg_price_near_dorm <- readRDS('data/geo_avg_basket_per_dorm.rds')
+dorm_regions <- readRDS('data/dorm_regions.rds') %>% select(-geometry)
+sf_regions  <- readRDS('data/geo_regions.rds')
+
+price_per_dorm_with_region <- left_join(sf_avg_price_near_dorm, dorm_regions)
+price_per_region <- price_per_dorm_with_region %>% 
+  group_by(region) %>% 
+  summarise(mean_price = mean(mean_price)) %>% 
+  ungroup() %>% st_set_geometry(NULL)
+
+sf_price_per_region <- left_join(price_per_region, sf_regions) %>% st_as_sf(., crs=3414)
+  
+saveRDS(sf_price_per_region, 'data/geo_price_per_region.rds')
+tm_shape(sf_price_per_region) + tm_polygons(col = 'mean_price')
+
+```
+
+
+3. Getting the list of dorms for which there is price data
+```{r}
+geo_prices <- sf_grocery_prices %>% st_set_geometry(NULL)
+
+dorms_with_baskets <- geo_prices %>% filter(!is.na(Basket.price)) %>% distinct(dorm_id)
+saveRDS(dorms_with_baskets, 'data/tbl_dorms_with_baskets.rds')
+
+
+sf_dorms <- readRDS('data/geo_dorms.rds')
+
+dorms_with_baskets <- dorms_with_baskets %>% mutate(has_basket = TRUE)
+dorms_with_basket_info <- left_join(sf_dorms, dorms_with_baskets) %>%
+  mutate(has_basket = ifelse(is.na(has_basket), FALSE, TRUE))
+
+saveRDS(dorms_with_basket_info, 'data/geo_dorms_has_basket.rds')
+```
+
+4. Getting mean price per k means cluster
+```{r}
+dorm_k_means_clustering <- readRDS('data/geo_k_means_dorms.rds')
+regions <- readRDS('data/geo_regions.rds')
+avg_price_near_dorm <- readRDS('data/geo_avg_basket_per_dorm.rds') %>% st_set_geometry(NULL)
+
+dorm_k_means_clustering <- dorm_k_means_clustering %>%
+  select(-n_hawkers, -n_supermarkets, -n_bus_stops) %>% rename(access_type = .cluster)
+
+dorm_k_means_clustering$access_type <- recode(dorm_k_means_clustering$access_type, `2` = 'Moderate Access', `1` = 'Best Access', `3` = 'Poor Access')
+
+prices_per_dorm_with_access_type <- left_join(dorm_k_means_clustering, avg_price_near_dorm) %>% filter(!is.na(mean_price))
+
+price_per_access_type <- prices_per_dorm_with_access_type %>% 
+  group_by(access_type) %>% 
+  summarise(mean_price = mean(mean_price)) %>% 
+  ungroup()
+
+saveRDS(dorm_k_means_clustering, 'data/geo_dorms_with_access_clusters.rds')
+saveRDS(price_per_access_type, 'data/tbl_price_per_access_type.rds')
+```
+
+5. Summing access in different regions
+```{r}
+regions_by_access <- left_join(dorm_k_means_clustering, dorm_regions) %>%  group_by(region) %>% 
+  summarise(perc_poor_access = sum(access_type == 'Poor Access')/n(),
+            perc_mod_access = sum(access_type == 'Moderate Access')/n(),
+            perc_best_access =  sum(access_type == 'Best Access')/n(),) %>% 
+  ungroup()
+
+sf_regions_by_access <- left_join(regions_by_access, regions) %>% st_as_sf(., crs=3414)
+
+saveRDS(sf_regions_by_access, 'data/geo_regions_by_access.rds')
+tm_shape(sf_regions_by_access) + tm_polygons(col='perc_best_access')
+tm_shape(sf_regions_by_access) + tm_polygons(col='perc_poor_access')
+```
+

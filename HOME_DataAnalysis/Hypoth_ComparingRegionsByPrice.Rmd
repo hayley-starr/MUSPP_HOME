@@ -1,0 +1,192 @@
+---
+title: "Between_clusters"
+author: "Jia Xin"
+date: "4/2/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+# Grocery shops 
+
+```{r}
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
+```
+
+## Basket of goods
+
+```{r}
+grocery_shops_prices_basket_cleaned <- grocery_shops_prices %>%
+  filter(Basket.price != "NA")
+```
+
+```{r}
+kruskal.test(Basket.price ~ Region_specific, data = grocery_shops_prices_basket_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_basket_cleaned$Basket.price, grocery_shops_prices_basket_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Eggs
+
+```{r}
+grocery_shops_prices_egg_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.1.egg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.1.egg ~ Region_specific, data = grocery_shops_prices_egg_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_egg_cleaned$Price.of.1.egg, grocery_shops_prices_egg_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Rice
+
+```{r}
+grocery_shops_prices_rice_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.rice.kg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.rice.kg ~ Region_specific, data = grocery_shops_prices_rice_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_rice_cleaned$Price.of.rice.kg, grocery_shops_prices_rice_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Curry
+
+```{r}
+grocery_shops_prices_curry_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.curry.powder.kg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.curry.powder.kg ~ Region_specific, data = grocery_shops_prices_curry_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_curry_cleaned$Price.of.curry.powder.kg, grocery_shops_prices_curry_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Dhal
+
+```{r}
+grocery_shops_prices_dhal_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.dhal.kg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.dhal.kg ~ Region_specific, data = grocery_shops_prices_dhal_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_dhal_cleaned$Price.of.dhal.kg , grocery_shops_prices_dhal_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Onions
+
+```{r}
+grocery_shops_prices_onions_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.onions.kg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.onions.kg ~ Region_specific, data = grocery_shops_prices_onions_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_onions_cleaned$Price.of.onions.kg, grocery_shops_prices_onions_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Potatoes
+
+```{r}
+grocery_shops_prices_potatoes_cleaned <- grocery_shops_prices %>%
+  filter(Price.of.potatoes.kg != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.potatoes.kg ~ Region_specific, data = grocery_shops_prices_potatoes_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(grocery_shops_prices_potatoes_cleaned$Price.of.potatoes.kg, grocery_shops_prices_potatoes_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+# Food outlets
+```{r}
+food_prices <- read.csv("data/food_outlets_prices_test.csv")
+```
+
+## Briyani 
+```{r}
+food_prices_briyani_cleaned <- food_prices %>%
+  filter(Price.of.briyani != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.briyani ~ Region_specific, data = food_prices_briyani_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(food_prices_briyani_cleaned$Price.of.briyani, food_prices_briyani_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Rice with chicken 
+```{r}
+food_prices_chicken_rice_cleaned <- food_prices %>%
+  filter(Price.of.rice.with.chicken != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.rice.with.chicken ~ Region_specific, data = food_prices_chicken_rice_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(food_prices_chicken_rice_cleaned$Price.of.rice.with.chicken, food_prices_chicken_rice_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```
+
+## Prata 
+```{r}
+food_prices_prata_cleaned <- food_prices %>%
+  filter(Price.of.plain.prata != "NA")
+```
+
+```{r}
+kruskal.test(Price.of.plain.prata ~ Region_specific, data = food_prices_prata_cleaned)
+```
+
+```{r}
+pairwise.wilcox.test(food_prices_prata_cleaned$Price.of.plain.prata, food_prices_prata_cleaned$Region_specific,
+                 p.adjust.method = "BH")
+```

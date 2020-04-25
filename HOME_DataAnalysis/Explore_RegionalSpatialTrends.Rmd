@@ -1,0 +1,270 @@
+---
+title: "Analysing Regional Trends in Density of Amenities"
+author: "Hayley Garment"
+date: "4/24/2020"
+output: html_document
+---
+
+In this file:
+1. Visualize density of bus stops per region and dorm
+2. Visualize density of grocery shops per region
+3. Visualize density of restaurants per region
+4. Visualize density of supermarkets per region
+5. Get density of hawker centers per region
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+library(sp)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+```{r}
+# read in regional data
+sf_regions <- readRDS('data/geo_regions.rds')
+dorms <- readRDS('data/dorm_regions.rds')
+sf_dorms <- st_as_sf(dorms, crs=3414)
+```
+
+1. Visualize bus stops per dorm
+```{r}
+bus_stops <- readRDS('data/geo_bus_stops_with_ids.rds')
+
+bus_stops_per_dorm <- bus_stops %>% 
+  st_set_geometry(NULL) %>%
+  group_by(dorm_id) %>% 
+  summarize(n_bus_stops = n()) %>% 
+  ungroup()
+
+sf_stops_per_dorm <- left_join(sf_dorms, bus_stops_per_dorm)
+
+saveRDS(sf_stops_per_dorm, 'data/calculated/geo_dorm_bus_stops.rds')
+
+tm_shape(sf_stops_per_dorm) +
+  tm_dots(col='n_bus_stops', size = 0.07)
+```
+
+1. Visualize the density of bus stops in each region
+```{r}
+# number of dorms and number of stops in each region
+dorms_stops_per_region <- left_join(dorms, bus_stops_per_dorm) %>%
+  mutate(n_bus_stops = ifelse(is.na(n_bus_stops),0, n_bus_stops)) %>% 
+  group_by(region) %>% 
+  summarize(regional_bus_stops= sum(n_bus_stops), regional_dorms = n()) %>% 
+  ungroup()
+
+# calculate density
+dorms_stops_per_region <- dorms_stops_per_region %>%
+  mutate(stops_per_dorm = regional_bus_stops/regional_dorms)
+
+sf_regions_with_bus_stops <- left_join(sf_regions, dorms_stops_per_region)
+
+# map
+sf_regions_with_bus_stops %>% 
+  tm_shape() + 
+  tm_polygons(col = 'stops_per_dorm', alpha = 0.5) +
+  tm_shape(sf_dorms) +
+  tm_dots()
+
+saveRDS(sf_regions_with_bus_stops,  'data/calculated/geo_region_bus_stops.rds')
+```
+
+Conclusion: Those two top dorms in west 4 probably sould be in  west 2! Update clusters?
+
+2. Visualize grocery shops per dorm
+```{r}
+sf_groceries <- readRDS('data/geo_groceries_with_ids.rds')
+
+groceries_per_dorm <- sf_groceries %>% 
+  st_set_geometry(NULL) %>%
+  group_by(dorm_id) %>% 
+  summarize(n_groceries = n()) %>% 
+  ungroup()
+
+sf_groceries_per_dorm <- left_join(sf_dorms, groceries_per_dorm)
+
+saveRDS(sf_groceries_per_dorm, 'data/calculated/geo_dorm_groceries.rds')
+
+tm_shape(sf_groceries_per_dorm) +
+  tm_dots(col='n_groceries', size = 0.07)
+```
+
+2. Visualize grocery shop density per region
+```{r}
+# number of dorms and number of groceries in each region
+dorms_groceries_per_region <- left_join(dorms, groceries_per_dorm) %>%
+  mutate(n_groceries = ifelse(is.na(n_groceries),0, n_groceries)) %>% 
+  group_by(region) %>% 
+  summarize(regional_groceries = sum(n_groceries), regional_dorms = n()) %>% 
+  ungroup()
+
+# calculate density
+dorms_groceries_per_region <- dorms_groceries_per_region %>%
+  mutate(groceries_per_dorm = regional_groceries/regional_dorms)
+
+sf_regions_with_groceries <- left_join(sf_regions, dorms_groceries_per_region)
+
+# map
+sf_regions_with_groceries %>% 
+  tm_shape() + 
+  tm_polygons(col = 'groceries_per_dorm', alpha = 0.5) +
+  tm_shape(sf_dorms) +
+  tm_dots()
+
+saveRDS(sf_regions_with_groceries,  'data/calculated/geo_region_groceries.rds')
+```
+
+Is all of this data  correct? Why would a centrally located dorm not have as many groceries? Need a  way to represent missing data!
+
+
+3. Visualize restaurants per dorm
+```{r}
+sf_restaurants <- readRDS('data/geo_restaurants_with_ids.rds')
+
+restaurants_per_dorm <- sf_restaurants %>% 
+  st_set_geometry(NULL) %>%
+  group_by(dorm_id) %>% 
+  summarize(n_restaurants = n()) %>% 
+  ungroup()
+
+sf_restaurants_per_dorm <- left_join(sf_dorms, restaurants_per_dorm)
+
+saveRDS(sf_restaurants_per_dorm, 'data/calculated/geo_dorm_restaurants.rds')
+
+tm_shape(sf_restaurants_per_dorm) +
+  tm_dots(col='n_restaurants', size = 0.07)
+```
+
+3. Visualize restaurant density per region
+```{r}
+# number of dorms and number of groceries in each region
+dorms_restaurants_per_region <- left_join(dorms, restaurants_per_dorm) %>%
+  mutate(n_restaurants = ifelse(is.na(n_restaurants),0, n_restaurants)) %>% 
+  group_by(region) %>% 
+  summarize(regional_restaurants = sum(n_restaurants), regional_dorms = n()) %>% 
+  ungroup()
+
+# calculate density
+dorms_restaurants_per_region <- dorms_restaurants_per_region %>%
+  mutate(restaurants_per_dorm = regional_restaurants/regional_dorms)
+
+sf_regions_with_restaurants <- left_join(sf_regions, dorms_restaurants_per_region)
+
+# map
+sf_regions_with_restaurants %>% 
+  tm_shape() + 
+  tm_polygons(col = 'restaurants_per_dorm', alpha = 0.5) +
+  tm_shape(sf_dorms) +
+  tm_dots()
+
+saveRDS(sf_regions_with_restaurants,  'data/calculated/geo_region_restaurants.rds')
+```
+
+Again, need a way to tag missing data.
+
+4. Visualize supermarkets:(
+```{r}
+sf_supermarkets <- readRDS('data/geo_supermarkets_2km_with_ids.rds')
+
+supermarkets_per_dorm <- sf_supermarkets %>% 
+  st_set_geometry(NULL) %>%
+  group_by(dorm_id) %>% 
+  summarize(n_supermarkets = n()) %>% 
+  ungroup()
+
+sf_supermarkets_per_dorm <- left_join(sf_dorms, supermarkets_per_dorm)
+
+saveRDS(sf_supermarkets_per_dorm, 'data/calculated/geo_dorm_supermarkets.rds')
+
+tm_shape(sf_supermarkets_per_dorm) +
+  tm_dots(col='n_supermarkets', size = 0.07)
+```
+
+4. Visualize supermarket density per region
+```{r}
+# number of dorms and number of groceries in each region
+dorms_supermarkets_per_region <- left_join(dorms, supermarkets_per_dorm) %>%
+  mutate(n_supermarkets = ifelse(is.na(n_supermarkets),0, n_supermarkets)) %>% 
+  group_by(region) %>% 
+  summarize(regional_supermarkets = sum(n_supermarkets), regional_dorms = n()) %>% 
+  ungroup()
+
+# calculate density
+dorms_supermarkets_per_region <- dorms_supermarkets_per_region %>%
+  mutate(supermarkets_per_dorm = regional_supermarkets/regional_dorms)
+
+sf_regions_with_supermarkets <- left_join(sf_regions, dorms_supermarkets_per_region)
+
+# map
+sf_regions_with_supermarkets %>% 
+  tm_shape() + 
+  tm_polygons(col = 'supermarkets_per_dorm', alpha = 0.5) +
+  tm_shape(sf_dorms) +
+  tm_dots()
+
+saveRDS(sf_regions_with_supermarkets,  'data/calculated/geo_region_supermarkets.rds')
+```
+
+
+5. Visualize hawkers:(
+```{r}
+sf_hawkers <- readRDS('data/geo_hawkers_2km_with_ids.rds')
+
+hawkers_per_dorm <- sf_hawkers %>% 
+  st_set_geometry(NULL) %>%
+  group_by(dorm_id) %>% 
+  summarize(n_hawkers = n()) %>% 
+  ungroup()
+
+sf_hawkers_per_dorm <- left_join(sf_dorms, hawkers_per_dorm)
+
+saveRDS(sf_hawkers_per_dorm, 'data/calculated/geo_dorm_hawkers.rds')
+
+tm_shape(sf_hawkers_per_dorm) +
+  tm_dots(col='n_hawkers', size = 0.07)
+```
+
+5. Visualize hawker density per region
+```{r}
+# number of dorms and number of groceries in each region
+dorms_hawkers_per_region <- left_join(dorms, hawkers_per_dorm) %>%
+  mutate(n_hawkers = ifelse(is.na(n_hawkers),0, n_hawkers)) %>% 
+  group_by(region) %>% 
+  summarize(regional_hawkers = sum(n_hawkers), regional_dorms = n()) %>% 
+  ungroup()
+
+# calculate density
+dorms_hawkers_per_region <- dorms_hawkers_per_region %>%
+  mutate(hawkers_per_dorm = regional_hawkers/regional_dorms)
+
+sf_regions_with_hawkers <- left_join(sf_regions, dorms_hawkers_per_region)
+
+# map
+sf_regions_with_hawkers %>% 
+  tm_shape() + 
+  tm_polygons(col = 'hawkers_per_dorm', alpha = 0.5) +
+  tm_shape(sf_dorms) +
+  tm_dots()
+
+saveRDS(sf_regions_with_hawkers,'data/calculated/geo_region_hawkers.rds')
+```

@@ -1,0 +1,75 @@
+---
+title: "DormitoryData"
+author: "Hayley Garment"
+date: "2/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+```
+
+Cleaning the dormitory data and adding long-lat points.
+```{r}
+dormitories <- read_csv("data/worker_dormitory_locations_addr.csv")
+
+dormitories <- dormitories %>% clean_names()
+
+dormitories <- dormitories %>% 
+  select(-x7, -list_of_foreign_worker_dormitories_licensed_in_accordance_with_the_foreign_employee_dormitories_act_feda)
+
+dormitories <- dormitories %>% 
+  rename(name = name_of_dormitory) %>% 
+  rename(operator = name_of_operator)
+```
+
+Geocoding
+```{r}
+register_google(key = "AIzaSyD5QiSXsdezyH3ylxzOH43WOnQJOwgZxTM")
+
+dormitories$lon <- NA
+dormitories$lat <- NA
+
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# dormitories data frame in new columns lat and lon
+for(i in 1:nrow(dormitories)) {
+  result <- geocode(dormitories$address[i], output = "latlona", source = "google")
+  dormitories$lon[i] <- as.numeric(result[1])
+  dormitories$lat[i] <- as.numeric(result[2])
+}
+
+dormitories %>% view()
+
+dormitory_points <- dormitories %>%
+  filter(!is.na(lon)) %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+
+
+tmap_mode("view")
+
+dormitory_points %>% 
+  tm_shape() +
+  tm_dots()
+
+# looks good!
+saveRDS(dormitory_points, "data/dormitory_points.rds")
+```
+

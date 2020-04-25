@@ -1,0 +1,165 @@
+---
+title: "Visualizing Price Distribution"
+author: "Hayley Garment"
+date: "4/20/2020"
+output: html_document
+---
+
+# Visualizing Distribution of Food Prices around Migrant Worker Dormitories
+
+**Table of Contents**
+1. Visualize Dorms
+2. Visualize Regions
+3. Visualize Amenities
+4. Visualize Amenities nearby Dorms
+
+5. Visualize Price per basket per Dorm and Region
+7. Visualize Price per PCA clusters
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+Colors
+```{r}
+blue <- '#63eaff'
+purple <- '#6375ff'
+red <- '#e06e6e'
+green <- '#8ce06e'
+yellow <- '#ffe100'
+```
+
+
+1. Visualize Dorms
+```{r}
+tmap_mode("view")
+sf_dorms <- readRDS('data/geo_dorms_has_basket.rds')
+
+dorms_no_basket<- sf_dorms %>% filter(has_basket==FALSE)
+
+tm_shape(sf_dorms) + tm_dots(col=red) +
+  tm_shape(dorms_no_basket) + tm_dots(col ='grey') +
+  tm_add_legend (
+    type = "fill",
+    labels = c('has price data', 'no price data'),
+    col = c(red, 'grey'))
+```
+
+2. Visualize Regions
+```{r}
+sf_regions <- readRDS('data/geo_regions.rds')
+sf_regions %>% count()
+
+tm_shape(sf_regions) + tm_polygons(alpha=0.5, col='region', palette = "Paired", n = 13, legend.show=FALSE) +
+  tm_shape(sf_dorms) + tm_dots()
+```
+
+3. Visualize Amenities
+```{r}
+supermarkets <- readRDS('data/geo_supermarkets.rds')
+hawkers <- readRDS('data/geo_hawkers.rds')
+bus_stops <- readRDS('data/geo_bus_stops.rds')
+
+tm_shape(bus_stops) + tm_dots(col=purple, size=0.005) +
+tm_shape(supermarkets) + tm_dots(col=green, size = 0.03) +
+tm_shape(hawkers) + tm_dots(col=red, size = 0.03) +
+tm_shape(sf_dorms) + tm_dots(col=yellow, size = 0.06) +
+tm_layout(title='Official Dorms, Supermarkets, Hawker Centers and Bus Stops') +
+tm_add_legend (
+    type = "fill",
+    labels = c('dormitory', 'supermarket', 'hawker center', 'bus stop'),
+    col = c(yellow, green, red, purple),
+    title = "")
+
+```
+
+4.Visualize Amenities near dorms
+```{r}
+nearby_hawkers <- readRDS('data/geo_hawkers_2km_with_ids.rds')
+nearby_supermarkets <- readRDS('data/geo_supermarkets_2km_with_ids.rds')
+nearby_bus_stops <- readRDS('data/geo_bus_stops_with_ids.rds') %>% st_transform(crs=3414)
+
+tm_shape(nearby_bus_stops) + tm_dots(col=purple, size=0.005) +
+tm_shape(nearby_supermarkets) + tm_dots(col=green, size = 0.03) +
+tm_shape(nearby_hawkers) + tm_dots(col=red, size = 0.03) +
+tm_shape(sf_dorms) + tm_dots(col=yellow, size = 0.04) +
+tm_layout(title='Nearby Supermarkets, Hawker Centers and Bus Stops') +
+tm_add_legend (
+    type = "fill",
+    labels = c('dormitory', 'supermarket', 'hawker center', 'bus stop'),
+    col = c(yellow, green, red, purple),
+    title = "")
+```
+
+
+5. Visualize Mean Basket Price per Dorm and Region
+```{r}
+avg_basket_dorm <- readRDS('data/geo_avg_basket_per_dorm.rds')
+tm_shape(avg_basket_dorm) + tm_dots(col='mean_price')
+
+avg_basket_region <- readRDS('data/geo_price_per_region.rds')
+tm_shape(avg_basket_region) + 
+    tm_polygons(col='mean_price',
+                palette = "viridis", n = 5, contrast = c(0.9, 0.7),
+                alpha = 0.5,
+                legend.format = list(fun = function(x) paste0('$', x))) +
+  tm_shape(avg_basket_dorm) + tm_dots(col=red) +
+  tm_shape(dorms_no_basket) + tm_dots() +
+  tm_layout(title='Mean Price of Basket of Goods by Region') +
+  tm_add_legend (
+    type = "fill",
+    labels = c('has data', 'no data'),
+    col = c(red, 'black'))
+```
+
+
+
+
+
+
+```{r}
+dorms_with_access_clusters <- readRDS( 'data/geo_dorms_with_access_clusters.rds') %>% st_as_sf(., crs=3414)
+
+best_access <- dorms_with_access_clusters %>% filter(access_type == 'Best Access')
+mod_access <- dorms_with_access_clusters %>% filter(access_type == 'Moderate Access')
+poor_access <- dorms_with_access_clusters %>% filter(access_type == 'Poor Access')
+
+tm_shape(best_access) + tm_dots(col=blue) +
+tm_shape(mod_access) + tm_dots(col=yellow) +
+tm_shape(poor_access) + tm_dots(col=red)
+
+regions_with_access <- readRDS('data/geo_regions_by_access.rds') %>% mutate()
+
+tm_shape(best_access) + tm_dots(col=blue) +
+tm_shape(mod_access) + tm_dots(col=yellow) +
+tm_shape(poor_access) + tm_dots(col=red) +
+  tm_layout(title='Dorms by Access Category') +
+  tm_add_legend (
+    type = "fill",
+    labels = c('best access - $37.9/bskt', 'moderate acccess - $35.0/bskt', 'poor access - $34.4/bskt'),
+    col = c(blue, yellow, red),
+    title='Mean Price per Access Category')
+
+tm_shape(regions_with_access) + 
+  tm_polygons(col='perc_poor_access',
+              palette = "plasma", n = 6, contrast = c(0.5, 0.0),
+              alpha = 0.4) +
+  tm_layout(title='Regions by Percent of Dorms with Poor Access')
+```
+

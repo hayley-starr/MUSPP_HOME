@@ -1,0 +1,72 @@
+---
+title: "Generate Region Polygons"
+author: "Hayley Garment"
+date: "4/24/2020"
+output: html_document
+---
+
+In this file:
+1. Get convex hull of dorms in each region
+2. Buffer this polygon and save as "shape of dorm region/cluster"
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+library(sp)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+
+```{r}
+# loadorms and their regions
+dorm_regions <- readRDS('data/dorm_geo_with_regions_ids.rds')
+
+#tm_shape(dorm_regions) + tm_dots()
+```
+
+
+```{r}
+# get  the list of regions
+regions <- dorm_regions %>%
+  st_set_geometry(NULL) %>%
+  distinct(region)
+
+# for each region create a convex hull that spans the points
+for(i in 1:nrow(regions)) {
+  region_name <- regions$region[i]
+  region_dorms <- dorm_regions %>% filter(region == region_name) 
+  region_polygon <- st_convex_hull(st_union(region_dorms)) %>% st_buffer(600)
+  
+  regions$polygons[i] = region_polygon
+}
+
+sf_regions <- st_as_sf(regions, crs=3414)
+
+sf_regions %>% 
+  tm_shape() + tm_polygons(alpha = 0.3)
+```
+
+```{r}
+#save
+#write_rds(sf_regions, 'data/geo_regions.rds')
+```
+

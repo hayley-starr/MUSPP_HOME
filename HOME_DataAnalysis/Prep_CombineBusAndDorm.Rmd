@@ -1,0 +1,111 @@
+---
+title: "Combining Transport With Dorm Data"
+author: "Hayley Garment"
+date: "4/18/2020"
+output: html_document
+---
+
+In this file:
+1. Find all bus stops  within 600 m of a dorm
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+
+**Get dorm locations and add IDs for each dorm**
+```{r}
+dorm_geo <- readRDS('data/dorm_points_with_point_features')
+
+dorm_geo <- dorm_geo %>% 
+  mutate(dormitory = iconv(dormitory, to = "UTF-8", sub = "")) %>% 
+  mutate(., dorm_id = rownames(.))
+
+#saveRDS(dorm_geo,'data/dorm_geo_with_ids.rds')
+```
+
+
+**Get bus stop locations**
+```{r}
+bus_stops <- read_sf("data/BusStopLocation_Apr2019/BusStop.shp")
+
+bus_stops <- bus_stops %>%
+  select(-LOC_DESC, -BUS_ROOF_N) %>% 
+  rename(stop_id = BUS_STOP_N)
+```
+
+**Create 600m buffer around dorms**
+```{r}
+# draw 600m around each dorm
+dorms_600m <- dorm_geo %>%
+  st_buffer(600)
+
+# prepare dorms and bus stops for joining
+st_crs(dorms_600m) <- 3414
+st_crs(bus_stops) <- 3414
+
+bus_stops
+
+saveRDS(bus_stops, 'data/geo_bus_stops.rds')
+
+```
+
+**Get bus stops within buffer of each dorm**
+```{r}
+# for each dorm get the bus stops that surround it
+# make list of bus stops with id of dorm they are close to
+
+bus_stops_near_dorms = list()
+
+for(i in 1:nrow(dorms_600m)) {
+  intersection <- st_intersects(bus_stops, dorms_600m$geometry[i], sparse = F)
+  bus_stops_in_600m <- bus_stops %>% filter(intersection)
+  bus_stops_in_600m <- bus_stops_in_600m %>% 
+    mutate(dorm_id = dorms_600m$dorm_id[i])
+  
+  bus_stops_near_dorms[[i]] <- bus_stops_in_600m
+}
+
+
+all_bus_stops_near_dorms <- do.call(rbind, bus_stops_near_dorms)
+
+saveRDS(all_bus_stops_near_dorms, 'data/geo_bus_stops_with_ids.rds')
+```
+
+**Write to Geojson files**
+```{r}
+# fix the crs so the points are in lon lat
+dorm_geo <- st_transform(dorm_geo, sf::st_crs("+proj=longlat +datum=WGS84"))
+all_bus_stops_near_dorms <- st_transform(all_bus_stops_near_dorms, sf::st_crs("+proj=longlat +datum=WGS84"))
+
+st_write(all_bus_stops_near_dorms,'data/bus_stops_near_dorms_labelled.geojson')
+st_write(dorm_geo,'data/dorms_with_id.geojson')
+```
+
+**Visualize**
+```{r}
+tm_shape(dorm_geo) + tm_dots (col = "red") + tm_shape(all_bus_stops_near_dorms) + tm_dots (col = "green")
+```
+
+

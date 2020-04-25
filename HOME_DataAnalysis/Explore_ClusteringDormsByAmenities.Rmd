@@ -1,0 +1,289 @@
+---
+title: "Clustering Dorms on Amenities"
+author: "Hayley Garment"
+date: "4/24/2020"
+output: html_document
+---
+
+In this file:
+1. Aggregating amenity data for dorms
+2. Clustering dorms spatially using amenities - failure :(
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+library(sp)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+
+library(distances)
+library(broom)
+library(ggfortify)
+library(psych)
+library(factoextra)
+```
+
+1. Bind all data together
+```{r}
+regions <- readRDS('data/geo_regions.rds')
+
+hawkers <- readRDS('data/calculated/geo_dorm_hawkers.rds')
+groceries <- readRDS('data/calculated/geo_dorm_groceries.rds')
+supermarkets <- readRDS('data/calculated/geo_dorm_supermarkets.rds')
+restaurants <- readRDS('data/calculated/geo_dorm_restaurants.rds')
+bus_stops <- readRDS('data/calculated/geo_dorm_bus_stops.rds')
+
+dorm_amenities <- bind_cols(list(hawkers$dorm_id,
+              hawkers$dormitory, 
+              hawkers$n_hawkers, 
+              groceries$n_groceries,
+              supermarkets$n_supermarkets,
+              restaurants$n_restaurants,
+              bus_stops$n_bus_stops,
+              hawkers$geometry))
+
+colnames(dorm_amenities) <- c('dorm_id', 'dormitory', 'n_hawkers', 'n_groceries', 'n_supermarkets', 'n_restuarants', 'n_bus_stops', 'geometry')
+
+dorm_amenities[is.na(dorm_amenities)] <- 0
+
+sf_dorm_amenities <- st_as_sf(dorm_amenities, crs=3414)
+```
+
+
+```{r}
+saveRDS(sf_dorm_amenities, 'data/calculated/geo_dorm_amenities.rds')
+
+#tm_shape(sf_dorm_amenities) + tm_dots(col='n_bus_stops')
+```
+
+2. Clustering the dorms spatially - not working
+```{r}
+hex_grid <- read_rds('data/hex_grid_sg.rds')
+hex_grid <- hex_grid %>% st_transform(crs = 3414)
+sf_dorm_amenities <- sf_dorm_amenities %>% st_transform(crs = 3414)
+
+amenity_hex <- st_join(sf_dorm_amenities, hex_grid) %>% 
+  st_set_geometry(NULL)
+
+avg_amenity_hex <- amenity_hex %>% 
+  group_by(hex_id) %>% 
+  summarise(groceries = mean(n_groceries),
+            dorms = n(),
+            hawkers = mean(n_hawkers),
+            supermarkets = mean(n_supermarkets),
+            bus_stops = mean(n_bus_stops),
+            restuarants = mean(n_restuarants)) %>% 
+  left_join(hex_grid, .) %>% 
+  filter(!is.na(dorms))
+```
+
+
+```{r}
+# getting the aggregate value for each cluster
+cluster_data <- avg_amenity_hex %>% 
+    st_set_geometry(NULL) %>%
+    select(groceries, hawkers, supermarkets, bus_stops, restuarants)
+
+
+sp_filename <- "data/amenities_sp.rds"
+neighbors_filename = "data/amenities_neighbors.rds"
+connected_neighbors_filename = "data/amenities_neighbors_connect.rds"
+
+
+  # getting the data into the right shape to to work as a graph
+hex_sp = as(avg_amenity_hex, 'Spatial')
+hex_neighbors = poly2nb(hex_sp)
+plot(hex_neighbors, coordinates(hex_sp))
+  
+saveRDS(hex_sp, sp_filename)
+saveRDS(hex_neighbors, neighbors_filename)
+  
+  ## in rstudio console manually connect the two graphs ##
+
+#  CANNOT, just too spaced outfor this to work :()
+```
+
+
+3. Classifying regions instead
+```{r}
+# get  regional  desnities of the amenities
+hawkers <- readRDS('data/calculated/geo_region_hawkers.rds')
+groceries <- readRDS('data/calculated/geo_region_groceries.rds')
+supermarkets <- readRDS('data/calculated/geo_region_supermarkets.rds')
+restaurants <- readRDS('data/calculated/geo_region_restaurants.rds')
+bus_stops <- readRDS('data/calculated/geo_region_bus_stops.rds')
+
+region_amenitiy_density <- bind_cols(list(
+              hawkers$region, 
+              hawkers$regional_hawkers, 
+              groceries$regional_groceries,
+              supermarkets$regional_supermarkets,
+              restaurants$regional_restaurants,
+              bus_stops$regional_bus_stops,
+              hawkers$geometry))
+
+colnames(region_amenitiy_density) <- c('region', 'dens_hawkers', 'dens_groc', 'dens_supermk', 'dens_rest', 'dens_bus', 'geometry')
+```
+
+
+```{r}
+pc <- region_amenitiy_density %>% 
+  column_to_rownames(var = "region") %>% 
+  select(-geometry,  -dens_hawkers) %>% 
+  prcomp(., center = T, scale. = T) # instead of scaling our data first, we can let `prcomp` do it for us
+
+tidy(pc, "pcs") # first three are biggest
+
+tidy(pc, "pcs") %>% 
+  ggplot(aes(x = PC, y = percent)) +
+  geom_line() +
+  geom_text(aes(x = PC, y = percent, label = PC), nudge_y = 0.03)
+
+tidy(pc, "pcs") %>% 
+  ggplot(aes(x = PC, y = cumulative)) +
+  geom_hline(yintercept = 0.9, color = "orange") +
+  geom_line() +
+  geom_text(aes(x = PC, y = cumulative, label = PC), nudge_y = 0.03)
+```
+
+Maybe 3 components are ok? But the first component is very strong!
+
+```{r}
+tidy(pc, "variables") %>% 
+  filter(PC < 4) %>% # only show first 3 components
+  ggplot(aes(x = column, y = value)) + 
+  geom_hline(yintercept = 0) + 
+  geom_col(aes(fill=(value >= 0)),
+           show.legend = FALSE) +
+  coord_flip() +
+  facet_grid(~PC)
+```
+
+```{r}
+autoplot(pc, label = TRUE, x = 1, y = 2, loadings = T, loadings.label = T)
+```
+
+```{r}
+ region_amenitiy_density_no_geom <- region_amenitiy_density %>% column_to_rownames(var = "region") %>% 
+  select(-dens_hawkers, -geometry)
+
+rownames(region_amenitiy_density_no_geom)
+
+# normalize  cols and sum  the total amenity score
+
+amenity_density_mat <- t(apply(region_amenitiy_density_no_geom, 1, function(x)(x-min(x))/(max(x)-min(x))))
+amenity_density <- as.data.frame(amenity_density_mat) %>% rownames_to_column(var = "region")
+amenity_density <- amenity_density %>%  mutate(total_amen = (dens_groc + dens_supermk + dens_rest + dens_bus))
+
+amenity_density  %>% arrange(desc(total_amen))
+
+
+sf_amenity_density <- left_join(amenity_density, regions) %>% st_as_sf(., crs= 3414)
+tm_shape(sf_amenity_density) + tm_polygons(col='total_amen', alpha=0.5)
+
+```
+
+4. Classifying dorms with PCS
+```{r}
+hawkers <- readRDS('data/calculated/geo_dorm_hawkers.rds')
+supermarkets <- readRDS('data/calculated/geo_dorm_supermarkets.rds')
+bus_stops <- readRDS('data/calculated/geo_dorm_bus_stops.rds')
+
+dorm_amenities <- bind_cols(list(hawkers$dorm_id,
+              hawkers$dormitory, 
+              hawkers$n_hawkers, 
+              supermarkets$n_supermarkets,
+              bus_stops$n_bus_stops,
+              hawkers$geometry))
+
+colnames(dorm_amenities) <- c('dorm_id', 'dormitory', 'n_hawkers', 'n_supermarkets', 'n_bus_stops', 'geometry')
+
+dorm_amenities[is.na(dorm_amenities)] <- 0
+
+#sf_dorm_amenities <- st_as_sf(dorm_amenities, crs=3414)
+```
+```{r}
+cluster_data <- dorm_amenities %>% 
+  select(-dorm_id, -geometry) %>% 
+  column_to_rownames(var = "dormitory")
+
+pc <- cluster_data %>% 
+  prcomp(., center = T, scale. = T) # instead of scaling our data first, we can let `prcomp` do it for us
+
+tidy(pc, "pcs") # first three are biggest
+
+tidy(pc, "pcs") %>% 
+  ggplot(aes(x = PC, y = percent)) +
+  geom_line() +
+  geom_text(aes(x = PC, y = percent, label = PC), nudge_y = 0.03)
+
+tidy(pc, "pcs") %>% 
+  ggplot(aes(x = PC, y = cumulative)) +
+  geom_hline(yintercept = 0.9, color = "orange") +
+  geom_line() +
+  geom_text(aes(x = PC, y = cumulative, label = PC), nudge_y = 0.03)
+
+tidy(pc, "variables") %>% 
+  filter(PC < 4) %>% # only show first 3 components
+  ggplot(aes(x = column, y = value)) + 
+  geom_hline(yintercept = 0) + 
+  geom_col(aes(fill=(value >= 0)),
+           show.legend = FALSE) +
+  coord_flip() +
+  facet_grid(~PC)
+
+
+
+fviz_cluster(kmeans_clusters, data = cluster_data)
+```
+
+5. K-means for dormitories
+```{r}
+cluster_data <- dorm_amenities %>% 
+  select(-dorm_id, -geometry) %>% 
+  column_to_rownames(var = "dormitory")
+
+kmeans_clusters <- kmeans(cluster_data, centers = 3, nstart = 50)
+
+kmeans_clusters
+
+dorm_k_means_clustering <- augment(kmeans_clusters, dorm_amenities)
+
+saveRDS(dorm_k_means_clustering, 'data/geo_k_means_dorms.rds')
+
+fviz_cluster(kmeans_clusters, data = cluster_data)
+```
+
+
+```{r}
+calculate_totwithinss <- function(k, data = cluster_data, nstart = 5) {
+  kmeans(data, k, nstart) %>% 
+    pluck('tot.withinss')
+}
+
+optimal_k <- tibble(k = 1:27,
+                    totwithinss = map_dbl(1:27, calculate_totwithinss))
+
+ggplot(optimal_k, aes(x = k, y = totwithinss)) + geom_line() + geom_point()
+
+fviz_nbclust(cluster_data, kmeans, method = "wss")
+```
+

@@ -1,0 +1,193 @@
+---
+title: "Combine Grocery Shop, Restaurant, Supermarket Locations with Dorms"
+author: "Hayley Garment"
+date: "4/24/2020"
+output: html_document
+---
+
+In this file:
+1. Get  all grocery shops within 600m of a dorm and id them
+2. Get all restaurants within 600m of a dorm and id them
+3. Get all supermarkets within 2km of a dorm and id them
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+Get the dorm data and draw buffer
+```{r}
+dorms <- readRDS('data/dorm_regions.rds')
+sf_dorms <- st_as_sf(dorms, crs=3414)
+
+# draw 600m around each dorm
+dorms_600m <- sf_dorms %>%
+  st_buffer(600)
+
+dorms_1km <- sf_dorms %>%
+  st_buffer(1000)
+
+dorms_2km <- sf_dorms %>%
+  st_buffer(2000)
+
+```
+
+1. Get all grocery shops near dorms
+```{r}
+groceries <- read.csv('data/grocery_shops_locations_test.csv')
+sf_groceries <- st_as_sf(groceries, coords = c("Lon", "Lat"), crs = 4326) %>%
+  st_transform(3414)
+
+#tm_shape(sf_groceries) + tm_dots()
+```
+
+
+```{r}
+# for each dorm get the groceries that surround it
+# make list of groceries with id of dorm they are close to
+
+groceries_near_dorms = list()
+
+for(i in 1:nrow(dorms_600m)) {
+  intersection <- st_intersects(sf_groceries, dorms_600m$geometry[i], sparse = F)
+  groceries_in_600m <- sf_groceries %>% filter(intersection)
+  groceries_in_600m <- groceries_in_600m %>% 
+    mutate(dorm_id = dorms_600m$dorm_id[i])
+  
+  groceries_near_dorms[[i]] <- groceries_in_600m
+}
+
+
+all_groceries_near_dorms <- do.call(rbind, groceries_near_dorms)
+
+#tm_shape(all_groceries_near_dorms) + tm_dots(col='dorm_id')
+```
+
+
+```{r}
+saveRDS(all_groceries_near_dorms, 'data/geo_groceries_with_ids.rds')
+```
+
+
+2. Get all food outlets near dorms
+```{r}
+restaurants <- read.csv('data/food_outlets_locations_test.csv')
+sf_restaurants <- st_as_sf(restaurants, coords = c("Lon", "Lat"), crs = 4326) %>%
+  st_transform(3414)
+
+#tm_shape(sf_restaurants) + tm_dots()
+```
+
+
+```{r}
+# for each dorm get the groceries that surround it
+# make list of groceries with id of dorm they are close to
+
+restaurants_near_dorms = list()
+
+for(i in 1:nrow(dorms_600m)) {
+  intersection <- st_intersects(sf_restaurants, dorms_600m$geometry[i], sparse = F)
+  restaurants_in_600m <- sf_restaurants %>% filter(intersection)
+  restaurants_in_600m <- restaurants_in_600m %>% 
+    mutate(dorm_id = dorms_600m$dorm_id[i])
+  
+  restaurants_near_dorms[[i]] <- restaurants_in_600m
+}
+
+
+all_restaurants_near_dorms <- do.call(rbind, restaurants_near_dorms)
+
+#tm_shape(all_restaurants_near_dorms) + tm_dots(col='dorm_id')
+```
+
+
+```{r}
+saveRDS(all_restaurants_near_dorms, 'data/geo_restaurants_with_ids.rds')
+```
+
+
+3. Supermarkets
+```{r}
+supermarkets <- read.csv('data/supermarket_locations_filtered.csv')
+sf_supermarkets <- st_as_sf(supermarkets, coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+
+saveRDS(sf_supermarkets, 'data/geo_supermarkets.rds')
+
+#tm_shape(sf_supermarkets) + tm_dots()
+```
+
+
+```{r}
+supermarkets_near_dorms = list()
+
+for(i in 1:nrow(dorms_1km)) { #or 2km
+  intersection <- st_intersects(sf_supermarkets, dorms_1km$geometry[i], sparse = F)
+  supermarkets_in_2km <- sf_supermarkets %>% filter(intersection)
+  supermarkets_in_2km <- supermarkets_in_2km %>% 
+    mutate(dorm_id = dorms_1km$dorm_id[i])
+  
+  supermarkets_near_dorms[[i]] <- supermarkets_in_2km
+}
+
+
+all_supermarkets_near_dorms <- do.call(rbind, supermarkets_near_dorms)
+
+tm_shape(all_supermarkets_near_dorms) + tm_dots(col='dorm_id')
+
+#saveRDS(all_supermarkets_near_dorms, 'data/geo_supermarkets_1km_with_ids.rds') #or 2km
+```
+
+
+4. Hawker centers near dorms
+```{r}
+#hawkers <- readRDS('data/hawkers_1km_by_dorm.rds')
+hawkers <- read.csv('data/hawker_centres_locations_cleaned.csv')
+sf_hawkers <- st_as_sf(hawkers, coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+
+saveRDS(sf_hawkers, 'data/geo_hawkers.rds')
+
+#tm_shape(sf_hawkers) + tm_dots()
+```
+
+
+```{r}
+hawkers_near_dorms = list()
+
+for(i in 1:nrow(dorms_2km)) { #or 2km
+  intersection <- st_intersects(sf_hawkers, dorms_2km$geometry[i], sparse = F)
+  hawkers_in_2km <- sf_hawkers %>% filter(intersection)
+  hawkers_in_2km <- hawkers_in_2km %>% 
+    mutate(dorm_id = dorms_2km$dorm_id[i])
+  
+  hawkers_near_dorms[[i]] <- hawkers_in_2km
+}
+
+
+all_hawkers_near_dorms <- do.call(rbind, hawkers_near_dorms)
+
+tm_shape(all_hawkers_near_dorms) + tm_dots(col='dorm_id')
+
+saveRDS(all_hawkers_near_dorms, 'data/geo_hawkers_2km_with_ids.rds') #or 2km
+```

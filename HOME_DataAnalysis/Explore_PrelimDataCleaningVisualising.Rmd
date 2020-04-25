@@ -1,0 +1,355 @@
+---
+title: "Data Cleaning and Visualising"
+author: "Jia Xin"
+date: "3/18/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(lubridate) # this package is part of tidyverse but not loaded by default
+library(repurrrsive)
+library(tools)
+
+library(tmap)
+library(sf)
+library(geojsonsf)
+library(ggmap)
+library(mapview)
+
+library(httr)
+library(osmdata)
+library(dplyr)
+library(stringr)
+
+library(forcats)
+library(infer)
+```
+
+# Dormitory locations data 
+
+## Loading dormitory locations data 
+```{r}
+dormitories <- read_csv("data/dormitories_cleaned.csv")
+```
+
+## Clean dormitory dataset 
+```{r}
+dormitories <- dormitories %>%
+  filter (dormitory != "NA")
+```
+
+```{r}
+dormitories <- dormitories %>%
+  clean_names()
+```
+
+```{r}
+dormitories <- dormitories %>% 
+mutate(dormitory = recode(dormitory,`Kian Teck Dormitory\n` = "Kian Teck Dormitory",`Kian Teck Hostel\n` = "Kian Teck Hostel",`Blue Stars Dormitory\n` = "Blue Stars Dormitory", `Jurong Apartments\n` = "Jurong Apartments", `Avery Lodge\n` = "Avery Lodge", `Cassia @ Penjuru\n` = "Cassia @ Penjuru")) %>%
+  mutate (address_of_dormitory = recode (address_of_dormitory, `16 Tuas Avenue 1 #07-201 Singapore 639529` = "14 Tuas Ave 1, Singapore 639499"))
+```
+
+## Geocoding
+```{r}
+register_google(key = "AIzaSyD5QiSXsdezyH3ylxzOH43WOnQJOwgZxTM")
+
+dormitories$lon <- NA
+dormitories$lat <- NA
+```
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# dormitories data frame in new columns lat and lon
+for(i in 1:nrow(dormitories)) {
+  result <- geocode(dormitories$address_of_dormitory[i], output = "latlona", source = "google")
+  dormitories$lon[i] <- as.numeric(result[1])
+  dormitories$lat[i] <- as.numeric(result[2])
+}
+
+dormitories %>% view()
+```
+
+## Plotting dormitory locations on tmap
+```{r}
+dormitories_points <- st_as_sf(dormitories, coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+```
+
+```{r}
+dorms_fix_encoding <- dormitories_points %>% 
+  mutate(dormitory = iconv(dormitory, to = "UTF-8", sub = ""))
+```
+
+```{r}
+tmap_mode("view")
+```
+
+```{r}
+tm_shape(dorms_fix_encoding) + tm_dots()
+```
+
+# Grocery shops locations
+```{r}
+grocery_shops_600m <-  read_csv("data/grocery_shops_locations_test.csv")
+```
+
+## Plot on map
+```{r}
+grocery_shops_600m_points <- st_as_sf(grocery_shops_600m, coords = c("Lon", "Lat"), crs = 4326) %>%
+  st_transform(3414)
+```
+
+```{r}
+#Little India grocery shops we sampled
+grocery_shops_points_little_india <- grocery_shops_600m_points %>%
+  filter (Remarks == "Little India")
+```
+
+```{r}
+#Grocery shops near dorms we sampled
+grocery_shops_600m_points_dorms <- grocery_shops_600m_points %>%
+  filter (Remarks != "Little India")
+```
+
+## Supermarkets location (NTUC, ShengSiong, Giant)
+
+```{r}
+supermarket_locations_filtered <- read.csv("data/supermarket_locations_filtered.csv")
+```
+
+```{r}
+supermarket_locations_points <- st_as_sf(supermarket_locations_filtered, coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+```
+
+```{r}
+supermarket_locations_points %>%
+  tm_shape() + tm_dots()
+```
+
+### Visually dorms with supermarkets within 2km
+
+```{r}
+supermarkets_2km <- supermarket_locations_points %>%
+  st_buffer(2000)
+```
+
+```{r}
+st_crs(supermarkets_2km)
+```
+
+```{r}
+st_crs(supermarkets_2km) <- 3414
+```
+
+```{r}
+supermarkets_2km <- supermarkets_2km %>%
+  st_union()
+```
+
+```{r}
+dorms_supermarkets_2km <- dorms_fix_encoding %>% 
+  filter(st_intersects(supermarkets_2km, dorms_fix_encoding, sparse = F)) 
+```
+
+```{r}
+#green = those with supermarkets within 2km
+tm_shape(dorms_fix_encoding) + tm_dots (col = "red") + tm_shape(dorms_supermarkets_2km) + tm_dots (col = "green")
+```
+
+### Supermarkets within 2km of dorm
+
+```{r}
+dorms_2km <- dorms_fix_encoding %>%
+  st_buffer(2000)
+```
+
+```{r}
+st_crs(dorms_2km)
+```
+
+```{r}
+st_crs(dorms_2km) <- 3414
+```
+
+```{r}
+dorms_2km <- dorms_2km %>%
+  st_union()
+```
+
+```{r}
+supermarkets_within_2km_of_dorms <- supermarket_locations_points %>% 
+  filter(st_intersects(dorms_2km, supermarket_locations_points, sparse = F)) 
+```
+
+```{r}
+tm_shape(dorms_fix_encoding) + tm_dots (col = "black") + tm_shape(supermarkets_within_2km_of_dorms) + tm_dots (col = "green")
+```
+
+## Plotting all grocery shops around dorms
+
+```{r}
+tm_shape(dorms_fix_encoding) + tm_bubbles () + tm_shape(supermarkets_within_2km_of_dorms) + tm_dots (col = "green") + tm_shape(grocery_shops_600m_points_dorms) + tm_dots(col = "blue") + tm_shape(grocery_shops_points_little_india) + tm_dots(col = "purple")
+```
+
+# Food outlets locations
+
+```{r}
+food_outlets_600m <- read.csv("data/food_outlets_locations_test.csv")
+```
+
+```{r}
+food_outlets_600m_points <- st_as_sf(food_outlets_600m, coords = c("Lon", "Lat"), crs = 4326) %>%
+  st_transform(3414)
+```
+
+```{r}
+#Little India grocery shops we sampled
+food_outlets_points_little_india <- food_outlets_600m_points %>%
+  filter (Remarks == "Little India")
+```
+
+```{r}
+#Grocery shops near dorms we sampled
+food_outlets_600m_points_dorms <- food_outlets_600m_points %>%
+  filter (Remarks != "Little India") %>%
+  filter (Remarks != "Hawker Centre")
+```
+
+## Hawker Centres 
+
+```{r}
+hawker_centres_locations <- read.csv("data/hawker_centres_locations_cleaned.csv")
+```
+
+```{r}
+hawker_centres_points <- st_as_sf(hawker_centres_locations, coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(3414)
+```
+
+## Visually dorms with hawker centres within 2km
+
+```{r}
+HC_2km <- hawker_centres_points %>%
+  st_buffer(2000)
+```
+
+```{r}
+st_crs(HC_2km)
+```
+
+```{r}
+st_crs(HC_2km) <- 3414
+```
+
+```{r}
+HC_2km <- HC_2km %>%
+  st_union()
+```
+
+```{r}
+dorms_HC_2km <- dorms_fix_encoding %>% 
+  filter(st_intersects(HC_2km, dorms_fix_encoding, sparse = F)) 
+```
+
+```{r}
+#green = those with hawker centres within 2km
+tm_shape(dorms_fix_encoding) + tm_dots (col = "red") + tm_shape(dorms_HC_2km) + tm_dots (col = "green")
+```
+
+### Hawker Centres within 2km of dorm
+
+```{r}
+HC_within_2km_of_dorms <- hawker_centres_points %>% 
+  filter(st_intersects(dorms_2km, hawker_centres_points, sparse = F)) 
+```
+
+```{r}
+tm_shape(dorms_fix_encoding) + tm_dots (col = "black") + tm_shape(HC_within_2km_of_dorms) + tm_dots (col = "green")
+```
+
+## Plotting all food outlets around dorms
+
+```{r}
+tm_shape(dorms_fix_encoding) + tm_bubbles () + tm_shape(HC_within_2km_of_dorms) + tm_dots (col = "green") + tm_shape(food_outlets_600m_points_dorms) + tm_dots(col = "blue") + tm_shape(food_outlets_points_little_india) + tm_dots(col = "purple")
+```
+
+# Bus stop information
+```{r}
+bus_stops <-read_sf("data/BusStopLocation_Apr2019/BusStop.shp")
+```
+
+```{r}
+bus_stops %>%
+  tm_shape () + tm_dots()
+```
+
+## Dormitories with bus stops within 600m
+
+```{r}
+bus_stops_600m <- bus_stops %>%
+  st_buffer(600)
+```
+
+```{r}
+st_crs(bus_stops_600m)
+```
+
+```{r}
+st_crs(bus_stops_600m) <- 3414
+```
+
+```{r}
+bus_stops_600m <- bus_stops_600m %>%
+  st_union()
+```
+
+```{r}
+dorms_bus_stops_600m <- dorms_fix_encoding %>% 
+  filter(st_intersects(bus_stops_600m, dorms_fix_encoding, sparse = F)) 
+```
+
+```{r}
+#green = those with bus stops 
+tm_shape(dorms_fix_encoding) + tm_dots (col = "red") + tm_shape(dorms_bus_stops_600m) + tm_dots (col = "green")
+```
+
+## Bus Stops within 600m of dorms
+
+```{r}
+dorms_600m <- dorms_fix_encoding %>%
+  st_buffer(600)
+```
+
+```{r}
+st_crs(dorms_600m)
+```
+
+```{r}
+st_crs(dorms_600m) <- 3414
+```
+
+```{r}
+st_crs(bus_stops) <- 3414
+```
+
+```{r}
+dorms_600m <- dorms_600m %>%
+  st_union()
+```
+
+```{r}
+bus_stops_within_600m_of_dorms <- bus_stops %>% 
+  filter(st_intersects(dorms_600m, bus_stops, sparse = F)) 
+```
+
+```{r}
+#green = those with bus stops 
+tm_shape(dorms_fix_encoding) + tm_bubbles () + tm_shape(bus_stops_within_600m_of_dorms) + tm_dots (col = "blue")
+```
+
+
+
