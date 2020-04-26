@@ -43,7 +43,8 @@ library(infer)
 ```{r}
 # get grocery shops near each dorm
 groceries_dorm_id  <- readRDS('data/geo_groceries_with_ids.rds')
-grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv")
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv") %>% 
+  select(Shop, Basket.price)
 
 sf_grocery_prices <- left_join(groceries_dorm_id, grocery_shops_prices) %>% 
   select(Shop, dorm_id, Basket.price, geometry)

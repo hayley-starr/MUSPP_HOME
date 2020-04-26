@@ -42,7 +42,7 @@ sf_dorms <- st_as_sf(dorms, crs=3414)
 
 # draw 600m around each dorm
 dorms_600m <- sf_dorms %>%
-  st_buffer(600)
+  st_buffer(1000)
 
 dorms_1km <- sf_dorms %>%
   st_buffer(1000)
