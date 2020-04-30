@@ -119,13 +119,9 @@ tm_shape(avg_basket_region) +
                 palette = "viridis", n = 5, contrast = c(0.9, 0.7),
                 alpha = 0.5,
                 legend.format = list(fun = function(x) paste0('$', x))) +
-  tm_shape(avg_basket_dorm) + tm_dots(col=red) +
+  tm_shape(avg_basket_dorm) + tm_dots() +
   tm_shape(dorms_no_basket) + tm_dots() +
-  tm_layout(title='Mean Price of Basket of Goods by Region') +
-  tm_add_legend (
-    type = "fill",
-    labels = c('has data', 'no data'),
-    col = c(red, 'black'))
+  tm_layout(title='Mean Price of Basket of Goods by Region')
 ```
 
 
@@ -134,6 +130,7 @@ tm_shape(avg_basket_region) +
 
 
 ```{r}
+mrt_lines_sf <- readRDS('data/lines_sf.rds')
 dorms_with_access_clusters <- readRDS( 'data/geo_dorms_with_access_clusters.rds') %>% st_as_sf(., crs=3414)
 
 best_access <- dorms_with_access_clusters %>% filter(access_type == 'Best Access')
@@ -149,6 +146,8 @@ regions_with_access <- readRDS('data/geo_regions_by_access.rds') %>% mutate()
 tm_shape(best_access) + tm_dots(col=blue) +
 tm_shape(mod_access) + tm_dots(col=yellow) +
 tm_shape(poor_access) + tm_dots(col=red) +
+    tm_shape(mrt_lines_sf) + 
+tm_lines(col = "colour") +
   tm_layout(title='Dorms by Access Category') +
   tm_add_legend (
     type = "fill",
@@ -160,6 +159,19 @@ tm_shape(regions_with_access) +
   tm_polygons(col='perc_poor_access',
               palette = "plasma", n = 6, contrast = c(0.5, 0.0),
               alpha = 0.4) +
+  tm_shape(mrt_lines_sf) + 
+tm_lines(col = "colour") +
   tm_layout(title='Regions by Percent of Dorms with Poor Access')
+```
+
+
+```{r}
+price_acesss_per_region <- st_join(avg_basket_region, regions_with_access) %>% select(region.x, mean_price, perc_best_access)
+
+ggplot(price_acesss_per_region, aes(perc_best_access, mean_price)) + geom_point()
+
+cor(price_acesss_per_region$mean_price, price_acesss_per_region$perc_best_access, method = "pearson")
+
+lm(price_acesss_per_region$mean_price ~  price_acesss_per_region$perc_best_access)
 ```
 

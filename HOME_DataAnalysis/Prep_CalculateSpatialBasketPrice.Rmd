@@ -39,6 +39,14 @@ library(forcats)
 library(infer)
 ```
 
+
+```{r}
+shops <- read.csv('data/grocery_shops_locations_test.csv')
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv") %>% 
+  select(Shop, Basket.price)
+```
+
+
 1. Calculate mean basket price for each dorm 
 ```{r}
 # get grocery shops near each dorm
@@ -47,7 +55,7 @@ grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv") %>%
   select(Shop, Basket.price)
 
 sf_grocery_prices <- left_join(groceries_dorm_id, grocery_shops_prices) %>% 
-  select(Shop, dorm_id, Basket.price, geometry)
+  select(Shop, dorm_id, shop_id, Basket.price, geometry)
 
 sf_grocery_prices_no_na <- sf_grocery_prices %>% 
   filter(!is.na(Basket.price))
@@ -60,6 +68,27 @@ saveRDS(sf_avg_price_near_dorm,'data/geo_avg_basket_per_dorm.rds')
 
 tm_shape(sf_avg_price_near_dorm) + tm_dots(col='mean_price')
 ```
+
+```{r}
+shops_dorms <- groceries_dorm_id %>% distinct(Shop)
+groceries_dorm_id %>% distinct(Shop) %>% count() #62 shops near dorms
+
+shops <- read.csv('data/grocery_shops_locations_test.csv')
+grocery_shops_prices <- read.csv("data/grocery_shops_price_test.csv") %>% 
+  select(Shop, Basket.price)
+
+prices <- grocery_shops_prices %>% filter(!is.na(Basket.price))
+
+shops_dorms$Shop
+prices$Shop
+
+in_dorms_not_prices <- setdiff(shops$Shop, grocery_shops_prices$Shop)
+in_prices_not_dorms <- setdiff( grocery_shops_prices$Shop, shops$Shop)
+
+"Minimart in Mandai Lodge 1"
+"Mimimart in Mandai Lodge 1" 
+```
+
 
 2. Calculate mean basket price for each region
 ```{r}
@@ -107,7 +136,7 @@ avg_price_near_dorm <- readRDS('data/geo_avg_basket_per_dorm.rds') %>% st_set_ge
 dorm_k_means_clustering <- dorm_k_means_clustering %>%
   select(-n_hawkers, -n_supermarkets, -n_bus_stops) %>% rename(access_type = .cluster)
 
-dorm_k_means_clustering$access_type <- recode(dorm_k_means_clustering$access_type, `2` = 'Moderate Access', `1` = 'Best Access', `3` = 'Poor Access')
+dorm_k_means_clustering$access_type <- recode(dorm_k_means_clustering$access_type, `2` = 'Moderate Access', `3` = 'Best Access', `1` = 'Poor Access')
 
 prices_per_dorm_with_access_type <- left_join(dorm_k_means_clustering, avg_price_near_dorm) %>% filter(!is.na(mean_price))
 

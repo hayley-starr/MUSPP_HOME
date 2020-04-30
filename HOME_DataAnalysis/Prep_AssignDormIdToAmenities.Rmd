@@ -42,7 +42,7 @@ sf_dorms <- st_as_sf(dorms, crs=3414)
 
 # draw 600m around each dorm
 dorms_600m <- sf_dorms %>%
-  st_buffer(1000)
+  st_buffer(600)
 
 dorms_1km <- sf_dorms %>%
   st_buffer(1000)
@@ -54,11 +54,12 @@ dorms_2km <- sf_dorms %>%
 
 1. Get all grocery shops near dorms
 ```{r}
-groceries <- read.csv('data/grocery_shops_locations_test.csv')
+groceries <- read.csv('data/grocery_shops_locations_test.csv') %>% 
+  mutate(., shop_id = rownames(.))
 sf_groceries <- st_as_sf(groceries, coords = c("Lon", "Lat"), crs = 4326) %>%
   st_transform(3414)
 
-#tm_shape(sf_groceries) + tm_dots()
+tm_shape(sf_groceries) + tm_dots()
 ```
 
 
@@ -80,6 +81,9 @@ for(i in 1:nrow(dorms_600m)) {
 
 all_groceries_near_dorms <- do.call(rbind, groceries_near_dorms)
 
+
+all_groceries_near_dorms %>% distinct(Shop) %>% count()
+sf_groceries %>% distinct(Shop) %>% count()
 #tm_shape(all_groceries_near_dorms) + tm_dots(col='dorm_id')
 ```
 
@@ -141,11 +145,11 @@ saveRDS(sf_supermarkets, 'data/geo_supermarkets.rds')
 ```{r}
 supermarkets_near_dorms = list()
 
-for(i in 1:nrow(dorms_1km)) { #or 2km
-  intersection <- st_intersects(sf_supermarkets, dorms_1km$geometry[i], sparse = F)
+for(i in 1:nrow(dorms_2km)) { #or 2km
+  intersection <- st_intersects(sf_supermarkets, dorms_2km$geometry[i], sparse = F)
   supermarkets_in_2km <- sf_supermarkets %>% filter(intersection)
   supermarkets_in_2km <- supermarkets_in_2km %>% 
-    mutate(dorm_id = dorms_1km$dorm_id[i])
+    mutate(dorm_id = dorms_2km$dorm_id[i])
   
   supermarkets_near_dorms[[i]] <- supermarkets_in_2km
 }
@@ -155,7 +159,7 @@ all_supermarkets_near_dorms <- do.call(rbind, supermarkets_near_dorms)
 
 tm_shape(all_supermarkets_near_dorms) + tm_dots(col='dorm_id')
 
-#saveRDS(all_supermarkets_near_dorms, 'data/geo_supermarkets_1km_with_ids.rds') #or 2km
+saveRDS(all_supermarkets_near_dorms, 'data/geo_supermarkets_2km_with_ids.rds') #or 2km
 ```
 
 

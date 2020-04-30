@@ -40,6 +40,7 @@ library(infer)
 ```
 
 ```{r}
+tmap_mode("view")
 # read in regional data
 sf_regions <- readRDS('data/geo_regions.rds')
 dorms <- readRDS('data/dorm_regions.rds')
